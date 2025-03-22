@@ -1,7 +1,7 @@
-package classes
+package Classes
 
-import interfaces.TakeHome
-import interfaces.ReturnItem
+import Interfaces.TakeHome
+import Interfaces.ReturnItem
 
 data class Discs(
     override val id: Int,
@@ -14,7 +14,7 @@ data class Discs(
         return "'$name' доступна: ${if (isAvailable) "Да" else "Нет"}\n"
     }
     override fun getAllInfo(): String {
-        return "$type '$name' доступен: ${if (isAvailable) "Да" else "Нет"}\n"
+        return "$type диск с названием: '$name' доступен: ${if (isAvailable) "Да" else "Нет"}\n"
     }
 
     override fun takeHome() {

@@ -1,21 +1,32 @@
-import classes.LibraryItems
-import classes.Books
-import classes.Newspapers
-import classes.Discs
-import interfaces.TakeHome
-import interfaces.ReadInLibrary
-import interfaces.ReturnItem
+import Classes.LibraryItems
+import Classes.Books
+import Classes.Newspapers
+import Classes.Discs
+import Classes.BookStore
+import Classes.DiscsStore
+import Classes.NewspaperStall
+import Classes.Manager
+import Classes.DigitizationCabinet
+import Interfaces.TakeHome
+import Interfaces.ReadInLibrary
+import Interfaces.ReturnItem
 
 fun main() {
 
     val libraryItems = createLibraryItems()
+    val manager = Manager()
+    val digCab = DigitizationCabinet<LibraryItems, Discs>()
+
     while (true) {
 
         printFirstMenu()
         when(readLine()?.toIntOrNull()) {
-            1 -> showItems(libraryItems.filterIsInstance<Books>())
-            2 -> showItems(libraryItems.filterIsInstance<Newspapers>())
-            3 -> showItems(libraryItems.filterIsInstance<Discs>())
+            1 -> showItems(libraryItems.filterTypes<Books>())
+            2 -> showItems(libraryItems.filterTypes<Newspapers>())
+            3 -> showItems(libraryItems.filterTypes<Discs>())
+            4 -> shoppingAtTheLibrary(manager)
+            5 -> manageDigCab(digCab)
+            6 -> demonstrateFilterTypes(libraryItems)
 
             0 -> return
             else -> println("Неверный ввод, попробуйте снова\n")
@@ -29,7 +40,7 @@ fun showItems(items: List<LibraryItems>) {
         items.forEachIndexed{ index, item ->
             println("${index + 1}. ${item.getShortInfo()}")
         }
-        println("0. Вернуться к выбору прдмета\n")
+        println("0. Вернуться в главное меню\n")
 
         val choice = readLine()?.trim()?.toIntOrNull()
         when(choice) {
@@ -83,4 +94,52 @@ fun handleItemActions(item: LibraryItems): Boolean{
         }
     }
     return false
+}
+
+fun shoppingAtTheLibrary(manager: Manager) {
+    while (true){
+
+        printShopMenu()
+        when(readLine()?.toIntOrNull()){
+            1 -> {
+                val book = manager.buy(BookStore())
+                println("Менеджером была куплена: ${book.getAllInfo()}")
+            }
+            2 -> {
+                val discs = manager.buy(DiscsStore())
+                println("Менеджером был куплен: ${discs.getAllInfo()}")
+            }
+            3 -> {
+                val newspapers = manager.buy(NewspaperStall())
+                println("Менеджером была куплена: ${newspapers.getAllInfo()}")
+            }
+
+            0 -> return
+            else -> println("Неверный ввод, попробуйте снова\n")
+        }
+    }
+}
+
+fun manageDigCab(digCab : DigitizationCabinet<LibraryItems, Discs>) {
+    while (true){
+
+        printDigCabMenu()
+        when(readLine()?.toIntOrNull()){
+            1 -> {
+                val book = Books(id = 231, name = "Дандадан", isAvailable = true, author = "Ториро Сакомото", pages = 11111)
+                val digDiscs = digCab.scanning(book)
+
+                println("Оцифрованный объект: ${digDiscs.getAllInfo()}")
+            }
+            2 -> {
+                val newspapers = Newspapers(id = 2331, name = "ГромаСтак", isAvailable = true, number = 2222, month = "Ноябрьский")
+                val digDiscs = digCab.scanning(newspapers)
+
+                println("Оцифрованный объект: ${digDiscs.getAllInfo()}")
+            }
+
+            0 -> return
+            else -> println("Неверный выбор, попробуйте снова\n")
+        }
+    }
 }

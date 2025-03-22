@@ -1,4 +1,4 @@
-package interfaces
+package Interfaces
 
 interface TakeHome {
     fun takeHome()
