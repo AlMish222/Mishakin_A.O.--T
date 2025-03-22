@@ -1,20 +1,23 @@
-package classes
+package Classes
 
-import interfaces.ReadInLibrary
-import interfaces.ReturnItem
+import Interfaces.ReadInLibrary
+import Interfaces.ReturnItem
 
 data class Newspapers(
     override val id: Int,
     override val name: String,
     override var isAvailable: Boolean,
-    val number: Int
+    val number: Int,
+    val month: String
 ) : LibraryItems(id, name, isAvailable), ReadInLibrary, ReturnItem {
 
     override fun getShortInfo(): String {
         return "'$name' доступна: ${if (isAvailable) "Да" else "Нет"}\n"
     }
     override fun getAllInfo(): String {
-        return "выпуск $number газуты '$name' с id: $id доступен: ${if (isAvailable) "Да" else "Нет"}\n"
+        //return "$month выпуск $number газуты '$name' с id: $id доступен: ${if (isAvailable) "Да" else "Нет"}\n"
+        return "газета '$name' $month выпуска под номером: $number с id: $id доступна: ${if (isAvailable) "Да" else "Нет"}\n"
+
     }
 
     override fun readInLibrary() {

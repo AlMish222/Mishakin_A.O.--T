@@ -1,8 +1,8 @@
-package classes
+package Classes
 
-import interfaces.TakeHome
-import interfaces.ReadInLibrary
-import interfaces.ReturnItem
+import Interfaces.TakeHome
+import Interfaces.ReadInLibrary
+import Interfaces.ReturnItem
 
 data class Books(
     override val id: Int,
@@ -10,13 +10,13 @@ data class Books(
     override var isAvailable: Boolean,
     val author: String,
     val pages: Int
-) : LibraryItems(id, name, isAvailable), TakeHome, ReadInLibrary, ReturnItem  {
+) : LibraryItems(id, name, isAvailable), TakeHome, ReadInLibrary, ReturnItem {
 
     override fun getShortInfo(): String {
         return "'$name' доступна: ${if (isAvailable) "Да" else "Нет"}\n"
     }
     override fun getAllInfo(): String {
-        return "книга: '$name'($pages стр.)автора: $author с id: $id доступна: ${if (isAvailable) "Да" else "Нет"}\n"
+        return "Книга под названием '$name'($pages стр.)автора: $author с id: $id доступна: ${if (isAvailable) "Да" else "Нет"}\n"
     }
 
     override fun takeHome() {
