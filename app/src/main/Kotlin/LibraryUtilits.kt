@@ -1,19 +1,20 @@
-import Classes.Books
-import Classes.Discs
-import Classes.LibraryItems
-import Classes.Newspapers
+import classes.Books
+import classes.Discs
+import classes.LibraryItems
+import classes.Month
+import classes.Newspapers
 
 
 fun createLibraryItems(): List<LibraryItems> {
     return listOf(
         Books(id = 1, name = "Маугли", isAvailable = true, author = "Джозеф Киплинг", pages = 202),
         Books(id = 2, name = "1984", isAvailable = false, author = "Джордж Оруэлл", pages = 328),
-        Newspapers(id = 3, name = "Сельская жизнь", isAvailable = false, number = 794, month = "Январский"),
+        Newspapers(id = 3, name = "Сельская жизнь", isAvailable = false, number = 794, month = Month.JANUARY),
         Books(id = 4, name = "Чистилище", isAvailable = true, author = "Сергей Тармашев", pages = 413),
         Books(id = 5, name = "Епифань", isAvailable = true, author = "Н.И. Никонов", pages = 477),
         Discs(id = 6, name = "The Dark Side of the Moon", isAvailable = true, type = "CD"),
         Discs(id = 7, name = "Inception", isAvailable = false, type = "DVD"),
-        Newspapers(id = 8, name = "Комсамольская правда", isAvailable = true, number = 1015, month = "Мартовский"),
+        Newspapers(id = 8, name = "Комсамольская правда", isAvailable = true, number = 1015, month = Month.MARCH),
         Discs(id = 9, name = "Наруто", isAvailable = false, type = "CD")
     )
 }

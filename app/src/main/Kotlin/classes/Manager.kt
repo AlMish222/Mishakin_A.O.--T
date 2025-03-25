@@ -1,9 +1,9 @@
-package Classes
+package classes
 
-import Interfaces.Shop
+import interfaces.Shop
 
 class Manager {
-    fun buy(shop: Shop): LibraryItems{
+    fun buy(shop: Shop<LibraryItems>): LibraryItems{
         println("Менеджер покупает предмет")
         return shop.toSell()
     }

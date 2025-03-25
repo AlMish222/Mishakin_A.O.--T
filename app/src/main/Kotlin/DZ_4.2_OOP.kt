@@ -1,21 +1,22 @@
-import Classes.LibraryItems
-import Classes.Books
-import Classes.Newspapers
-import Classes.Discs
-import Classes.BookStore
-import Classes.DiscsStore
-import Classes.NewspaperStall
-import Classes.Manager
-import Classes.DigitizationCabinet
-import Interfaces.TakeHome
-import Interfaces.ReadInLibrary
-import Interfaces.ReturnItem
+import classes.LibraryItems
+import classes.Books
+import classes.Newspapers
+import classes.Discs
+import classes.BookStore
+import classes.DiscsStore
+import classes.NewspaperStall
+import classes.Manager
+import classes.DigitizationCabinet
+import classes.Month
+import interfaces.TakeHome
+import interfaces.ReadInLibrary
+import interfaces.ReturnItem
 
 fun main() {
 
     val libraryItems = createLibraryItems()
     val manager = Manager()
-    val digCab = DigitizationCabinet<LibraryItems, Discs>()
+    val digCab = DigitizationCabinet<ReadInLibrary>()
 
     while (true) {
 
@@ -120,7 +121,7 @@ fun shoppingAtTheLibrary(manager: Manager) {
     }
 }
 
-fun manageDigCab(digCab : DigitizationCabinet<LibraryItems, Discs>) {
+fun manageDigCab(digCab : DigitizationCabinet<ReadInLibrary>) {
     while (true){
 
         printDigCabMenu()
@@ -132,7 +133,7 @@ fun manageDigCab(digCab : DigitizationCabinet<LibraryItems, Discs>) {
                 println("Оцифрованный объект: ${digDiscs.getAllInfo()}")
             }
             2 -> {
-                val newspapers = Newspapers(id = 2331, name = "ГромаСтак", isAvailable = true, number = 2222, month = "Ноябрьский")
+                val newspapers = Newspapers(id = 2331, name = "ГромаСтак", isAvailable = true, number = 2222, month = Month.NOVEMBER)
                 val digDiscs = digCab.scanning(newspapers)
 
                 println("Оцифрованный объект: ${digDiscs.getAllInfo()}")

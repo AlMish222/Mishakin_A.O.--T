@@ -1,8 +1,8 @@
-package Classes
+package classes
 
-import Interfaces.TakeHome
-import Interfaces.ReadInLibrary
-import Interfaces.ReturnItem
+import interfaces.TakeHome
+import interfaces.ReadInLibrary
+import interfaces.ReturnItem
 
 data class Books(
     override val id: Int,

@@ -1,7 +1,7 @@
-package Classes
+package classes
 
-import Interfaces.TakeHome
-import Interfaces.ReturnItem
+import interfaces.TakeHome
+import interfaces.ReturnItem
 
 data class Discs(
     override val id: Int,
