@@ -1,8 +1,10 @@
-package Classes
+package classes
 
-class DigitizationCabinet <in T : LibraryItems, out D : Discs>{
+import interfaces.ReadInLibrary
 
-    fun scanning(item: T): D {
+class DigitizationCabinet <in T : ReadInLibrary> {
+
+    fun scanning(item: T): Discs {
         return when (item) {
             is Books -> {
                 println("Оцифрована книга: '${item.name}'")
@@ -11,7 +13,7 @@ class DigitizationCabinet <in T : LibraryItems, out D : Discs>{
                     name = item.name,
                     isAvailable = true,
                     type = "CD"
-                ) as D
+                )
             }
 
             is Newspapers -> {
@@ -21,7 +23,7 @@ class DigitizationCabinet <in T : LibraryItems, out D : Discs>{
                     name = item.name,
                     isAvailable = true,
                     type = "CD"
-                ) as D
+                )
             }
             else -> throw IllegalArgumentException("Неподдерживаемый тип для оцифровки")
         }

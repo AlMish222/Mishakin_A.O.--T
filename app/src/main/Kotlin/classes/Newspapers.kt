@@ -1,14 +1,32 @@
-package Classes
+package classes
 
-import Interfaces.ReadInLibrary
-import Interfaces.ReturnItem
+import interfaces.ReadInLibrary
+import interfaces.ReturnItem
+
+
+enum class Month(val MonthName: String) {
+    JANUARY("Январский"),
+    FEBRUARY("Февральский"),
+    MARCH("Мартовский"),
+    APRIL("Апрельский"),
+    MAY("Майский"),
+    JUNE("Июньский"),
+    JULY("Июльский"),
+    AUGUST("Августовский"),
+    SEPTEMBER("Сентяборьский"),
+    OCTOBER("Октяборьский"),
+    NOVEMBER("Ноябрьский"),
+    DECEMBER("Декабрьский");
+
+    override fun toString() =MonthName
+}
 
 data class Newspapers(
     override val id: Int,
     override val name: String,
     override var isAvailable: Boolean,
     val number: Int,
-    val month: String
+    val month: Month
 ) : LibraryItems(id, name, isAvailable), ReadInLibrary, ReturnItem {
 
     override fun getShortInfo(): String {
