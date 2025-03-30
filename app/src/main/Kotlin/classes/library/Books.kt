@@ -1,4 +1,4 @@
-package classes
+package classes.library
 
 import interfaces.TakeHome
 import interfaces.ReadInLibrary
@@ -9,8 +9,9 @@ data class Books(
     override val name: String,
     override var isAvailable: Boolean,
     val author: String,
-    val pages: Int
-) : LibraryItems(id, name, isAvailable), TakeHome, ReadInLibrary, ReturnItem {
+    val pages: Int,
+    override var imageId: Int
+) : LibraryItems(id, name, isAvailable, imageId), TakeHome, ReadInLibrary, ReturnItem {
 
     override fun getShortInfo(): String {
         return "'$name' доступна: ${if (isAvailable) "Да" else "Нет"}\n"

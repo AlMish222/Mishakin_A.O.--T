@@ -1,5 +1,9 @@
 package classes
 
+import classes.library.Books
+import classes.library.Discs
+import classes.library.Newspapers
+import com.example.dz_1.R
 import interfaces.ReadInLibrary
 
 class DigitizationCabinet <in T : ReadInLibrary> {
@@ -12,7 +16,8 @@ class DigitizationCabinet <in T : ReadInLibrary> {
                     id = item.id + 10212,
                     name = item.name,
                     isAvailable = true,
-                    type = "CD"
+                    type = "CD",
+                    imageId = R.drawable.disc1
                 )
             }
 
@@ -22,7 +27,8 @@ class DigitizationCabinet <in T : ReadInLibrary> {
                     id = item.id + 10323,
                     name = item.name,
                     isAvailable = true,
-                    type = "CD"
+                    type = "CD",
+                    imageId = R.drawable.disc1
                 )
             }
             else -> throw IllegalArgumentException("Неподдерживаемый тип для оцифровки")
