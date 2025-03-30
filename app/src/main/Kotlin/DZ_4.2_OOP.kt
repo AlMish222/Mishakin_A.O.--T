@@ -1,13 +1,13 @@
-import classes.LibraryItems
-import classes.Books
-import classes.Newspapers
-import classes.Discs
+import classes.library.LibraryItems
+import classes.library.Books
+import classes.library.Newspapers
+import classes.library.Discs
 import classes.BookStore
 import classes.DiscsStore
 import classes.NewspaperStall
 import classes.Manager
 import classes.DigitizationCabinet
-import classes.Month
+import classes.library.Month
 import interfaces.TakeHome
 import interfaces.ReadInLibrary
 import interfaces.ReturnItem
@@ -127,13 +127,13 @@ fun manageDigCab(digCab : DigitizationCabinet<ReadInLibrary>) {
         printDigCabMenu()
         when(readLine()?.toIntOrNull()){
             1 -> {
-                val book = Books(id = 231, name = "Дандадан", isAvailable = true, author = "Ториро Сакомото", pages = 11111)
+                val book = Books(id = 231, name = "Дандадан", isAvailable = true, author = "Ториро Сакомото", pages = 11111, imageId = 1)
                 val digDiscs = digCab.scanning(book)
 
                 println("Оцифрованный объект: ${digDiscs.getAllInfo()}")
             }
             2 -> {
-                val newspapers = Newspapers(id = 2331, name = "ГромаСтак", isAvailable = true, number = 2222, month = Month.NOVEMBER)
+                val newspapers = Newspapers(id = 2331, name = "ГромаСтак", isAvailable = true, number = 2222, month = Month.NOVEMBER, imageId = 2)
                 val digDiscs = digCab.scanning(newspapers)
 
                 println("Оцифрованный объект: ${digDiscs.getAllInfo()}")

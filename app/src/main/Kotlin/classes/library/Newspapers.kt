@@ -1,4 +1,4 @@
-package classes
+package classes.library
 
 import interfaces.ReadInLibrary
 import interfaces.ReturnItem
@@ -26,8 +26,9 @@ data class Newspapers(
     override val name: String,
     override var isAvailable: Boolean,
     val number: Int,
-    val month: Month
-) : LibraryItems(id, name, isAvailable), ReadInLibrary, ReturnItem {
+    val month: Month,
+    override var imageId: Int
+) : LibraryItems(id, name, isAvailable, imageId), ReadInLibrary, ReturnItem {
 
     override fun getShortInfo(): String {
         return "'$name' доступна: ${if (isAvailable) "Да" else "Нет"}\n"

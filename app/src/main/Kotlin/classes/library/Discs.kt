@@ -1,4 +1,4 @@
-package classes
+package classes.library
 
 import interfaces.TakeHome
 import interfaces.ReturnItem
@@ -7,8 +7,9 @@ data class Discs(
     override val id: Int,
     override val name: String,
     override var isAvailable: Boolean,
-    val type: String
-) : LibraryItems(id, name, isAvailable), TakeHome, ReturnItem {
+    val type: String,
+    override var imageId: Int
+) : LibraryItems(id, name, isAvailable, imageId), TakeHome, ReturnItem {
 
     override fun getShortInfo(): String {
         return "'$name' доступна: ${if (isAvailable) "Да" else "Нет"}\n"
