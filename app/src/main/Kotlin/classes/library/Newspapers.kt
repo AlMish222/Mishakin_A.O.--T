@@ -1,7 +1,7 @@
 package classes.library
 
-import interfaces.ReadInLibrary
-import interfaces.ReturnItem
+import papka.ReadInLibrary
+import papka.ReturnItem
 
 
 enum class Month(val MonthName: String) {

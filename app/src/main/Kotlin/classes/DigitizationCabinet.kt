@@ -4,7 +4,7 @@ import classes.library.Books
 import classes.library.Discs
 import classes.library.Newspapers
 import com.example.dz_1.R
-import interfaces.ReadInLibrary
+import papka.ReadInLibrary
 
 class DigitizationCabinet <in T : ReadInLibrary> {
 

@@ -1,4 +1,4 @@
-package interfaces
+package papka
 
 interface TakeHome {
     fun takeHome()

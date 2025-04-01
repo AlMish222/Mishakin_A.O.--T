@@ -2,11 +2,10 @@ package com.example.dz_1
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import classes.library.LibraryItems
 import com.example.dz_1.databinding.LibraryItemsBinding
-import interfaces.OnItemClickListener
+import papka.OnItemClickListener
 
 
 class ItemsAdapter(

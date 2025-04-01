@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import classes.library.LibraryItems
 import com.example.dz_1.databinding.ActivityMainBinding
 import createLibraryItems
-import interfaces.OnItemClickListener
+import papka.OnItemClickListener
 
 class MainActivity : AppCompatActivity(), OnItemClickListener {
 

@@ -8,9 +8,9 @@ import classes.NewspaperStall
 import classes.Manager
 import classes.DigitizationCabinet
 import classes.library.Month
-import interfaces.TakeHome
-import interfaces.ReadInLibrary
-import interfaces.ReturnItem
+import papka.TakeHome
+import papka.ReadInLibrary
+import papka.ReturnItem
 
 fun main() {
 

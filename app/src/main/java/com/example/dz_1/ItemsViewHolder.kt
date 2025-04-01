@@ -3,7 +3,7 @@ package com.example.dz_1
 import androidx.recyclerview.widget.RecyclerView
 import classes.library.LibraryItems
 import com.example.dz_1.databinding.LibraryItemsBinding
-import interfaces.OnItemClickListener
+import papka.OnItemClickListener
 
 class ItemsViewHolder(
     private val binding: LibraryItemsBinding,
