@@ -2,4 +2,6 @@
     <string name="app_name">DZ_1</string>
     <string name="tvTtile">TvTitle</string>
     <string name="itemId">ItemID</string>
+    <string name="titleName">Название %s</string>
+    <string name="prItemId">ID: %int</string>
 </resources>
