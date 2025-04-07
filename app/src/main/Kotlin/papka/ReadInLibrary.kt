@@ -1,4 +1,4 @@
-package interfaces
+package papka
 
 interface ReadInLibrary {
     fun readInLibrary()

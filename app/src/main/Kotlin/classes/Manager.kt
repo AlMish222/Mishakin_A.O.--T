@@ -1,7 +1,7 @@
 package classes
 
 import classes.library.LibraryItems
-import interfaces.Shop
+import papka.Shop
 
 class Manager {
     fun buy(shop: Shop<LibraryItems>): LibraryItems {
