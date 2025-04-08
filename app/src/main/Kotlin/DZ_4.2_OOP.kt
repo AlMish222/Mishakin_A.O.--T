@@ -133,7 +133,7 @@ fun manageDigCab(digCab : DigitizationCabinet<ReadInLibrary>) {
                 println("Оцифрованный объект: ${digDiscs.getAllInfo()}")
             }
             2 -> {
-                val newspapers = Newspapers(id = 2331, name = "ГромаСтак", isAvailable = true, number = 2222, month = Month.NOVEMBER, imageId = 2)
+                val newspapers = Newspapers(id = 2331, name = "ГромаСтак", isAvailable = true, number = 2222, month = Month.NOVEMBER.toString(), imageId = 2)
                 val digDiscs = digCab.scanning(newspapers)
 
                 println("Оцифрованный объект: ${digDiscs.getAllInfo()}")

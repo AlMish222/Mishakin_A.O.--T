@@ -4,7 +4,7 @@ import papka.ReadInLibrary
 import papka.ReturnItem
 
 
-enum class Month(val MonthName: String) {
+enum class Month(private val MonthName: String) {
     JANUARY("Январский"),
     FEBRUARY("Февральский"),
     MARCH("Мартовский"),
@@ -25,16 +25,17 @@ data class Newspapers(
     override val id: Int,
     override val name: String,
     override var isAvailable: Boolean,
+    override var imageId: Int,
+
     val number: Int,
-    val month: Month,
-    override var imageId: Int
+    val month: String
+
 ) : LibraryItems(id, name, isAvailable, imageId), ReadInLibrary, ReturnItem {
 
     override fun getShortInfo(): String {
         return "'$name' доступна: ${if (isAvailable) "Да" else "Нет"}\n"
     }
     override fun getAllInfo(): String {
-        //return "$month выпуск $number газуты '$name' с id: $id доступен: ${if (isAvailable) "Да" else "Нет"}\n"
         return "газета '$name' $month выпуска под номером: $number с id: $id доступна: ${if (isAvailable) "Да" else "Нет"}\n"
 
     }
