@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/books"
+        android:title="@string/book" />
+
+    <item
+        android:id="@+id/newspapers"
+        android:title="@string/newspapers" />
+    <item
+        android:id="@+id/discs"
+        android:title="@string/discs" />
+</menu>

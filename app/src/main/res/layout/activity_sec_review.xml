@@ -2,125 +2,140 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    tools:context=".SecondActivity">
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
 
         <ImageView
             android:id="@+id/im"
             android:layout_width="93dp"
             android:layout_height="100dp"
+            android:layout_marginStart="140dp"
             android:adjustViewBounds="true"
-            android:foregroundGravity="left"
+            android:foregroundGravity="center"
             android:src="@drawable/book1" />
 
         <TextView
-            android:id="@+id/itemID"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-condensed"
+            android:id="@+id/usersItem"
+            android:layout_width="240dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="60dp"
             android:gravity="center"
-            android:padding="4dp"
-            android:text="@string/prItemId"
+            android:text="@string/some_item"
             android:textColor="@color/black"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"/>
 
-        <TextView
-            android:id="@+id/tvNameElement"
+
+        <EditText
+            android:id="@+id/nameEditText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
+            android:layout_marginTop="10dp"
+            android:autofillHints=""
             android:fontFamily="sans-serif-condensed"
             android:gravity="center"
+            android:inputType="text"
             android:padding="4dp"
-            android:text="@string/titleName"
+            android:text=""
             android:textColor="@color/black"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:ignore="LabelFor"
+            tools:text="@string/titleName"/>
 
-        <TextView
-            android:id="@+id/isAvailable"
+
+        <EditText
+            android:id="@+id/idEditText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
+            android:layout_marginTop="10dp"
+            android:autofillHints=""
             android:fontFamily="sans-serif-condensed"
             android:gravity="center"
+            android:inputType="text"
             android:padding="4dp"
-            android:text="@string/isAvailable"
+            android:text=""
             android:textColor="@color/black"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:ignore="LabelFor"
+            tools:text="@string/prItemId"/>
 
-        <TextView
-            android:id="@+id/tvAuthor"
+        <EditText
+            android:id="@+id/isAvailableText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
+            android:layout_marginTop="10dp"
+            android:autofillHints=""
             android:fontFamily="sans-serif-condensed"
             android:gravity="center"
+            android:inputType="text"
             android:padding="4dp"
-            android:text="@string/book_author"
+            android:text=""
             android:textColor="@color/black"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:ignore="LabelFor"
+            tools:text="@string/is_available"/>
 
-        <TextView
-            android:id="@+id/countPage"
+        <EditText
+            android:id="@+id/tvExtra1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
+            android:layout_marginTop="10dp"
+            android:autofillHints=""
             android:fontFamily="sans-serif-condensed"
             android:gravity="center"
+            android:inputType="text"
             android:padding="4dp"
-            android:text="@string/count_page"
+            android:text=""
             android:textColor="@color/black"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText,LabelFor"
+            tools:text="extra1"/>
 
-        <TextView
-            android:id="@+id/typeOfDiscs"
+        <EditText
+            android:id="@+id/tvExtra2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
+            android:layout_marginTop="10dp"
+            android:autofillHints=""
             android:fontFamily="sans-serif-condensed"
             android:gravity="center"
+            android:inputType="text"
             android:padding="4dp"
-            android:text="@string/type_disc"
+            android:text=""
             android:textColor="@color/black"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText,LabelFor"
+            tools:text="extra2"/>
 
-        <TextView
-            android:id="@+id/newsNumber"
+        <Button
+            android:id="@+id/saveButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-condensed"
-            android:gravity="center"
-            android:padding="4dp"
-            android:text="@string/news_number"
-            android:textColor="@color/black"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/month_rel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-condensed"
-            android:gravity="center"
-            android:padding="4dp"
-            android:text="@string/month_rel"
-            android:textColor="@color/black"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
+            android:layout_marginTop="40dp"
+            android:text="@string/save_new_element" />
 
     </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

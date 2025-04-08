@@ -10,12 +10,12 @@ fun createLibraryItems(): List<LibraryItems> {
     return listOf(
         Books(id = 1, name = "Маугли", isAvailable = true, author = "Джозеф Киплинг", pages = 202, imageId = R.drawable.book1),
         Books(id = 2, name = "1984", isAvailable = false, author = "Джордж Оруэлл", pages = 328, imageId = R.drawable.book1),
-        Newspapers(id = 3, name = "Сельская жизнь", isAvailable = false, number = 794, month = Month.JANUARY, imageId = R.drawable.newspaper1),
+        Newspapers(id = 3, name = "Сельская жизнь", isAvailable = false, number = 794, month = Month.JANUARY.toString(), imageId = R.drawable.newspaper1),
         Books(id = 4, name = "Чистилище", isAvailable = true, author = "Сергей Тармашев", pages = 413, imageId = R.drawable.book1),
         Books(id = 5, name = "Епифань", isAvailable = true, author = "Н.И. Никонов", pages = 477, imageId = R.drawable.book1),
         Discs(id = 6, name = "The Dark Side of the Moon", isAvailable = true, type = "CD", imageId = R.drawable.disc1),
         Discs(id = 7, name = "Inception", isAvailable = false, type = "DVD", imageId = R.drawable.disc1),
-        Newspapers(id = 8, name = "Комсамольская правда", isAvailable = true, number = 1015, month = Month.MARCH, imageId = R.drawable.newspaper1),
+        Newspapers(id = 8, name = "Комсамольская правда", isAvailable = true, number = 1015, month = Month.MARCH.toString(), imageId = R.drawable.newspaper1),
         Discs(id = 9, name = "Наруто", isAvailable = false, type = "CD", imageId = R.drawable.disc1)
     )
 }

@@ -8,11 +8,12 @@ import papka.Shop
 class NewspaperStall : Shop<Newspapers> {
     override fun toSell(): Newspapers {
         println("Купил газету 'Труд'")
-        return Newspapers(id = 833,
+        return Newspapers(
+            id = 833,
             name = "Труд",
             isAvailable = true,
             number = 1235,
-            month = Month.SEPTEMBER,
+            month = Month.SEPTEMBER.toString(),
             imageId = R.drawable.newspaper1
         )
     }

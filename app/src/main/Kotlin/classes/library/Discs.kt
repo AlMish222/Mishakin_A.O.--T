@@ -7,8 +7,10 @@ data class Discs(
     override val id: Int,
     override val name: String,
     override var isAvailable: Boolean,
-    val type: String,
-    override var imageId: Int
+    override var imageId: Int,
+
+    val type: String
+
 ) : LibraryItems(id, name, isAvailable, imageId), TakeHome, ReturnItem {
 
     override fun getShortInfo(): String {

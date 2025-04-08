@@ -2,32 +2,25 @@ package com.example.dz_1
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import android.view.MenuInflater
+import android.widget.PopupMenu
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import classes.library.Books
 import classes.library.Discs
-import classes.library.LibraryItems
 import classes.library.Newspapers
 import com.example.dz_1.databinding.ActivityMainBinding
 import createLibraryItems
 
-class MainActivity : AppCompatActivity(), OnItemClickListener {
+class MainActivity : AppCompatActivity() {
 
     private val libraryItems = createLibraryItems().toMutableList()
-    private lateinit var adapter: ItemsAdapter
+
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
-    }
-
-    companion object {
-        private const val REQUEST_ADD_ITEM = 1001
-        private const val MODE_VIEW = "view"
-        private const val MODE_ADD = "add"
     }
 
     private val swipe = object : Swipe(){
@@ -37,82 +30,126 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
     }
     private val touchHelper = ItemTouchHelper(swipe)
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        supportActionBar?.hide()
-        setContentView(binding.root)
-        initRecyclerView()
-
-        binding.addButton.setOnClickListener{
-            showAddItmeScreen()
-        }
-
-    }
-
-    private fun initRecyclerView() {
-        adapter = ItemsAdapter(this)
-
-        binding.rcView.apply {
-            layoutManager = GridLayoutManager(this@MainActivity, 1)
-            adapter = this@MainActivity.adapter
-            touchHelper.attachToRecyclerView(this)
-        }
-        adapter.setNewLibList(libraryItems)
-    }
-
-    private fun showAddItmeScreen() {
-        val selElement = arrayOf(
-            "Book",
-            "Newspaper",
-            "Disc"
-        )
-        AlertDialog.Builder(this)
-            .setTitle("Выберите элемент")
-            .setItems(selElement) {_, which ->
-            val type = when (which) {
-                0 -> "book"
-                1 -> "newspaper"
-                2 -> "disc"
-                else -> return@setItems
-            }
-            val intent = Intent(this, SecondActivity::class.java).apply {
-                putExtra("MODE", "add")
-                putExtra("ITEM_TYPE", type)
-            }
-            startActivityForResult(intent, REQUEST_ADD_ITEM)
-        }
-        .setNegativeButton("Отмена", null).show()
-    }
-
-
-    override fun onItemClick(item: LibraryItems, position: Int) {
+    private val adapter = ItemsAdapter(libraryItems) { items ->
         val intent = Intent(this, SecondActivity::class.java).apply {
-            putExtra("MODE", MODE_VIEW)
-            when (item) {
-                is Books -> putExtra("BOOK", item)
-                is Discs -> putExtra("DISC", item)
-                is Newspapers -> putExtra("NEWSPAPER", item)
+            putExtra(ITEM_ID, items.id)
+            putExtra(ITEM_NAME, items.name)
+            putExtra(ITEM_STATUS, false)
+            putExtra(ITEM_IMAGE, items.imageId)
+            putExtra(IS_AVAILABLE, items.isAvailable)
+            when (items) {
+                is Books -> {
+                    putExtra(BOOK_PAGES, items.pages)
+                    putExtra(BOOK_AUTHOR, items.author)
+                    putExtra(ITEM_TYPE, "Book")
+                }
+                is Newspapers -> {
+                    putExtra(NEWSPAPER_NUMBER, items.number)
+                    putExtra(NEWSPAPER_MONTH, items.month)
+                    putExtra(ITEM_TYPE, "Newspaper")
+                }
+                is Discs -> {
+                    putExtra(DISC_TYPE, items.type)
+                    putExtra(ITEM_TYPE, "Disc")
+                }
             }
         }
         startActivity(intent)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == REQUEST_ADD_ITEM && resultCode == RESULT_OK) {
-            val newItem = data?.run {
-                when {
-                    hasExtra("BOOK") -> getParcelableExtra<Books>("BOOK")
-                    hasExtra("DISC") -> getParcelableExtra<Discs>("DISC")
-                    hasExtra("NEWSPAPER") -> getParcelableExtra<Newspapers>("NEWSPAPER")
-                    else -> null
+    private val startForResult = registerForActivityResult(ActivityResultContracts
+        .StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            adapter.addLibListItem(when (result.data?.getStringExtra(ITEM_TYPE)) {
+                "Book" -> Books(
+                    result.data?.getIntExtra(ITEM_ID, 0) ?: 0,
+                    result.data?.getStringExtra(ITEM_NAME) ?: "",
+                    result.data?.getBooleanExtra(IS_AVAILABLE, true) ?: false,
+                    result.data?.getIntExtra(ITEM_IMAGE, 1) ?: 0,
+                    result.data?.getStringExtra(BOOK_AUTHOR) ?: "",
+                    result.data?.getIntExtra(BOOK_PAGES, 0) ?: 0
+                )
+                "Newspaper" -> Newspapers(
+                    result.data?.getIntExtra(ITEM_ID, 0) ?: 0,
+                    result.data?.getStringExtra(ITEM_NAME) ?: "",
+                    result.data?.getBooleanExtra(IS_AVAILABLE, true) ?: false,
+                    result.data?.getIntExtra(ITEM_IMAGE, 1) ?: 0,
+                    result.data?.getIntExtra(NEWSPAPER_NUMBER, 0) ?: 0,
+                    result.data?.getStringExtra(NEWSPAPER_MONTH) ?: ""
+                )
+                "Disc" -> Discs(
+                    result.data?.getIntExtra(ITEM_ID, 0) ?: 0,
+                    result.data?.getStringExtra(ITEM_NAME) ?: "",
+                    result.data?.getBooleanExtra(IS_AVAILABLE, true) ?: false,
+                    result.data?.getIntExtra(ITEM_IMAGE, 1) ?: 0,
+                    result.data?.getStringExtra(DISC_TYPE) ?: ""
+                )
+                else -> throw IllegalArgumentException("Неизвестный тип данных")
+            })
+        }
+    }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
+        setContentView(binding.root)
+
+        init()
+    }
+
+    private fun init() {
+        binding.apply {
+            touchHelper.attachToRecyclerView(rcView)
+            rcView.layoutManager = GridLayoutManager(this@MainActivity, 1)
+            rcView.adapter = adapter
+            addButton.setOnClickListener{
+                val popup = PopupMenu(this@MainActivity, it)
+                val inflater: MenuInflater = popup.menuInflater
+                inflater.inflate(R.menu.popup_menu_item, popup.menu)
+                popup.setOnMenuItemClickListener { menuItem ->
+                    when (menuItem.itemId) {
+                        R.id.books -> {
+                            startForResult.launch(SecondActivity.createIntent(this@MainActivity).apply {
+                                putExtra(ITEM_STATUS, true)
+                                putExtra(ITEM_TYPE, "Book")
+                            })
+                            true
+                        }
+                        R.id.newspapers -> {
+                            startForResult.launch(SecondActivity.createIntent(this@MainActivity).apply {
+                                putExtra(ITEM_STATUS, true)
+                                putExtra(ITEM_TYPE, "Newspaper")
+                            })
+                            true
+                        }
+                        R.id.discs -> {
+                            startForResult.launch(SecondActivity.createIntent(this@MainActivity).apply {
+                                putExtra(ITEM_STATUS, true)
+                                putExtra(ITEM_TYPE, "Disc")
+                            })
+                            true
+                        }
+                        else -> false
+                    }
                 }
-            }
-            newItem?.let {
-                libraryItems.add(it)
-                adapter.setNewLibList(libraryItems)
+                popup.show()
             }
         }
+    }
+
+    companion object {
+        const val ITEM_TYPE = "itemType"
+        const val ITEM_IMAGE = "im"
+        const val ITEM_STATUS = "newItem"
+        const val ITEM_ID = "id"
+        const val IS_AVAILABLE = "isAvailable"
+        const val ITEM_NAME = "name"
+        const val BOOK_PAGES = "countPage"
+        const val BOOK_AUTHOR = "author"
+        const val DISC_TYPE = "type"
+        const val NEWSPAPER_NUMBER = "number"
+        const val NEWSPAPER_MONTH = "month"
+        const val INDEX_DEFAULT_VALUE = -1
     }
 }

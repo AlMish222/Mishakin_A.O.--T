@@ -8,9 +8,11 @@ data class Books(
     override val id: Int,
     override val name: String,
     override var isAvailable: Boolean,
+    override var imageId: Int,
+
     val author: String,
-    val pages: Int,
-    override var imageId: Int
+    val pages: Int
+
 ) : LibraryItems(id, name, isAvailable, imageId), TakeHome, ReadInLibrary, ReturnItem {
 
     override fun getShortInfo(): String {

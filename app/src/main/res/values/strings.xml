@@ -2,6 +2,20 @@
     <string name="app_name">DZ_1</string>
     <string name="tvTtile">TvTitle</string>
     <string name="itemId">ItemID</string>
-    <string name="titleName">Название %s</string>
-    <string name="prItemId">ID: %int</string>
+    <string name="titleName">Название: %s</string>
+    <string name="prItemId">ID: %d</string>
+    <string name="add_new_element">Add New Element</string>
+    <string name="book_author">Имя автора: %s</string>
+    <string name="count_page">Кол-во страниц: %d</string>
+    <string name="type_disc">Тип диска: %s</string>
+    <string name="news_number">Номер газеты: %d</string>
+    <string name="month_rel">Месяц издания: %s</string>
+    <string name="save_new_element">Save New Element</string>
+    <string name="some_item">SomeItem</string>
+    <string name="book">Book</string>
+    <string name="newspapers">Newspaper</string>
+    <string name="discs">Disc</string>
+    <string name="is_available">Есть в наличии: </string>
+
+
 </resources>
