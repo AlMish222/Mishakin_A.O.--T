@@ -1,8 +1,8 @@
 package classes.library
 
-import papka.TakeHome
-import papka.ReadInLibrary
-import papka.ReturnItem
+import interfaces.TakeHome
+import interfaces.ReadInLibrary
+import interfaces.ReturnItem
 
 data class Books(
     override val id: Int,

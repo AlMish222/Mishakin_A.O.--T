@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SecondActivity"
+            android:name=".InformationAboutItemsActivity"
             android:exported="false"/>
     </application>
 

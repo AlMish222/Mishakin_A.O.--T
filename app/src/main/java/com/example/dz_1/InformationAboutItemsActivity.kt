@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import classes.library.Books
@@ -13,12 +14,13 @@ import classes.library.Newspapers
 import com.example.dz_1.databinding.ActivitySecReviewBinding
 
 
-class SecondActivity : AppCompatActivity() {
+class InformationAboutItemsActivity : AppCompatActivity() {
 
     private val binding by lazy {
         ActivitySecReviewBinding.inflate(layoutInflater)
     }
     private lateinit var items: LibraryItems
+    private val viewModel: ItemsDetailsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,35 +37,26 @@ class SecondActivity : AppCompatActivity() {
     }
 
     private fun showItem() {
-        items = when (intent.getStringExtra(ITEM_TYPE)) {
+        val itemType = intent.getStringExtra(ITEM_TYPE) ?: ""
 
-            "Book" -> Books(
-                intent.getIntExtra(ITEM_ID, 0),
-                intent.getStringExtra(ITEM_NAME) ?: "",
-                intent.getBooleanExtra(IS_AVAILABLE, true),
-                intent.getIntExtra(ITEM_IMAGE, 1),
-                intent.getStringExtra(BOOK_AUTHOR) ?: "",
-                intent.getIntExtra(BOOK_PAGES, 0),
-            )
-            
-            "Newspaper" -> Newspapers(
-                intent.getIntExtra(ITEM_ID, 0),
-                intent.getStringExtra(ITEM_NAME) ?: "",
-                intent.getBooleanExtra(IS_AVAILABLE, true),
-                intent.getIntExtra(ITEM_IMAGE, 1),
-                intent.getIntExtra(NEWSPAPER_NUMBER, 0),
-                intent.getStringExtra(NEWSPAPER_MONTH) ?: ""
-            )
-
-            "Disc" -> Discs(
-                intent.getIntExtra(ITEM_ID, 0),
-                intent.getStringExtra(ITEM_NAME) ?: "",
-                intent.getBooleanExtra(IS_AVAILABLE, true),
-                intent.getIntExtra(ITEM_IMAGE, 1),
-                intent.getStringExtra(DISC_TYPE) ?: ""
-            )
-            else -> throw IllegalArgumentException("Неизвестный тип данных")
-        }
+        items = viewModel.createItem(
+            id = intent.getIntExtra(ITEM_ID, 0),
+            name = intent.getStringExtra(ITEM_NAME) ?: "",
+            isAvailable = intent.getBooleanExtra(IS_AVAILABLE, true),
+            imageId = intent.getIntExtra(ITEM_IMAGE, 1),
+            extra1 = when (itemType) {
+                "Book" -> intent.getIntExtra(BOOK_PAGES, 0).toString()
+                "Newspaper" -> intent.getIntExtra(NEWSPAPER_NUMBER, 0).toString()
+                "Disc" -> intent.getStringExtra(DISC_TYPE) ?: ""
+                else -> ""
+            },
+            extra2 = when (itemType) {
+                "Book" -> intent.getStringExtra(BOOK_AUTHOR) ?: ""
+                "Newspaper" -> intent.getStringExtra(NEWSPAPER_MONTH) ?: ""
+                else -> ""
+            },
+            itemType = itemType
+        )
         setOldItems()
     }
 
@@ -92,68 +85,28 @@ class SecondActivity : AppCompatActivity() {
                 }
             }
             saveButton.setOnClickListener{
-                items = when (intent.getStringExtra(ITEM_TYPE)) {
-                    "Book" -> Books(
-                        idEditText.text.toString().toIntOrNull() ?: INDEX_DEFAULT_VALUE,
-                        nameEditText.text.toString(),
-                        isAvailableText.text.toString().toBoolean(),
-                        R.drawable.book1,
-                        tvExtra2.text.toString(),
-                        tvExtra1.text.toString().toIntOrNull() ?: INDEX_DEFAULT_VALUE
-                    )
-                    "Newspaper" -> Newspapers(
-                        idEditText.text.toString().toIntOrNull() ?: INDEX_DEFAULT_VALUE,
-                        nameEditText.text.toString(),
-                        isAvailableText.text.toString().toBoolean(),
-                        R.drawable.newspaper1,
-                        tvExtra1.text.toString().toIntOrNull() ?: INDEX_DEFAULT_VALUE,
-                        tvExtra2.text.toString()
-                    )
-                    "Disc" -> Discs(
-                        idEditText.text.toString().toIntOrNull() ?: INDEX_DEFAULT_VALUE,
-                        nameEditText.text.toString(),
-                        isAvailableText.text.toString().toBoolean(),
-                        R.drawable.disc1,
-                        tvExtra1.text.toString()
-                    )
+                items = viewModel.createItem(
+                    idEditText.text.toString().toIntOrNull() ?: INDEX_DEFAULT_VALUE,
+                    nameEditText.text.toString(),
+                    isAvailableText.text.toString().toBoolean(),
+                    when (intent.getStringExtra(ITEM_TYPE)) {
+                        "Book" -> R.drawable.book1
+                        "Newspaper" -> R.drawable.newspaper1
+                        "Disc" -> R.drawable.disc1
 
-                    else -> throw IllegalArgumentException("Неизвестный тип данных")
-                }
+                        else -> 0
+                    },
+                    tvExtra1.text.toString(),
+                    tvExtra2.text.toString(),
+                    intent.getStringExtra(ITEM_TYPE) ?: ""
+                )
                 setNewItem()
             }
         }
     }
 
     private fun setNewItem() {
-        val resultIntent = when (items) {
-            is Books -> Intent().apply {
-                putExtra(ITEM_ID, items.id)
-                putExtra(ITEM_NAME, items.name)
-                putExtra(IS_AVAILABLE, items.isAvailable)
-                putExtra(ITEM_IMAGE, items.imageId)
-                putExtra(BOOK_PAGES, (items as Books).pages)
-                putExtra(BOOK_AUTHOR, (items as Books).author)
-                putExtra(ITEM_TYPE, "Book")
-            }
-            is Newspapers -> Intent().apply {
-                putExtra(ITEM_ID, items.id)
-                putExtra(ITEM_NAME, items.name)
-                putExtra(IS_AVAILABLE, items.isAvailable)
-                putExtra(ITEM_IMAGE, items.imageId)
-                putExtra(NEWSPAPER_NUMBER, (items as Newspapers).number)
-                putExtra(NEWSPAPER_MONTH, (items as Newspapers).month)
-                putExtra(ITEM_TYPE, "Newspaper")
-            }
-            is Discs -> Intent().apply {
-                putExtra(ITEM_ID, items.id)
-                putExtra(ITEM_NAME, items.name)
-                putExtra(IS_AVAILABLE, items.isAvailable)
-                putExtra(ITEM_IMAGE, items.imageId)
-                putExtra(DISC_TYPE, (items as Discs).type)
-                putExtra(ITEM_TYPE, "Disc")
-            }
-            else -> throw IllegalArgumentException("Неизвестный тип данных")
-        }
+        val resultIntent = viewModel.createResultIntent(items)
         setResult(RESULT_OK, resultIntent)
         finish()
     }
@@ -212,7 +165,7 @@ class SecondActivity : AppCompatActivity() {
         const val INDEX_DEFAULT_VALUE = -1
 
         fun createIntent(context: Context): Intent {
-            return Intent(context, SecondActivity::class.java)
+            return Intent(context, InformationAboutItemsActivity::class.java)
             }
     }
 }

@@ -3,7 +3,7 @@ package classes
 import classes.library.Month
 import classes.library.Newspapers
 import com.example.dz_1.R
-import papka.Shop
+import interfaces.Shop
 
 class NewspaperStall : Shop<Newspapers> {
     override fun toSell(): Newspapers {

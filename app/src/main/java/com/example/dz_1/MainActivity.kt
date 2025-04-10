@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.MenuInflater
 import android.widget.PopupMenu
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -18,10 +19,11 @@ import createLibraryItems
 class MainActivity : AppCompatActivity() {
 
     private val libraryItems = createLibraryItems().toMutableList()
-
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
+    private val viewModel: MainViewModel by viewModels()
+    private val viewModel2: ItemsDetailsViewModel by viewModels()
 
     private val swipe = object : Swipe(){
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
@@ -31,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     private val touchHelper = ItemTouchHelper(swipe)
 
     private val adapter = ItemsAdapter(libraryItems) { items ->
-        val intent = Intent(this, SecondActivity::class.java).apply {
+        val intent = Intent(this, InformationAboutItemsActivity::class.java).apply {
             putExtra(ITEM_ID, items.id)
             putExtra(ITEM_NAME, items.name)
             putExtra(ITEM_STATUS, false)
@@ -57,35 +59,32 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private val startForResult = registerForActivityResult(ActivityResultContracts
-        .StartActivityForResult()) { result ->
+    private val startForResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
         if (result.resultCode == RESULT_OK) {
-            adapter.addLibListItem(when (result.data?.getStringExtra(ITEM_TYPE)) {
-                "Book" -> Books(
-                    result.data?.getIntExtra(ITEM_ID, 0) ?: 0,
-                    result.data?.getStringExtra(ITEM_NAME) ?: "",
-                    result.data?.getBooleanExtra(IS_AVAILABLE, true) ?: false,
-                    result.data?.getIntExtra(ITEM_IMAGE, 1) ?: 0,
-                    result.data?.getStringExtra(BOOK_AUTHOR) ?: "",
-                    result.data?.getIntExtra(BOOK_PAGES, 0) ?: 0
+            result.data?.let { data ->
+                val itemType = data.getStringExtra(ITEM_TYPE) ?: ""
+                val newItem = viewModel2.createItem(
+                    id = data.getIntExtra(ITEM_ID, 0),
+                    name = data.getStringExtra(ITEM_NAME) ?: "",
+                    isAvailable = data.getBooleanExtra(IS_AVAILABLE, true),
+                    imageId = data.getIntExtra(ITEM_IMAGE, 1),
+                    extra1 = when (itemType) {
+                        "Book" -> data.getIntExtra(BOOK_PAGES, 0).toString()
+                        "Newspaper" -> data.getIntExtra(NEWSPAPER_NUMBER, 0).toString()
+                        "Disc" -> data.getStringExtra(DISC_TYPE) ?: ""
+                        else -> ""
+                    },
+                    extra2 = when (itemType) {
+                        "Book" -> data.getStringExtra(BOOK_AUTHOR) ?: ""
+                        "Newspaper" -> data.getStringExtra(NEWSPAPER_MONTH) ?: ""
+                        else -> ""
+                    },
+                    itemType = itemType
                 )
-                "Newspaper" -> Newspapers(
-                    result.data?.getIntExtra(ITEM_ID, 0) ?: 0,
-                    result.data?.getStringExtra(ITEM_NAME) ?: "",
-                    result.data?.getBooleanExtra(IS_AVAILABLE, true) ?: false,
-                    result.data?.getIntExtra(ITEM_IMAGE, 1) ?: 0,
-                    result.data?.getIntExtra(NEWSPAPER_NUMBER, 0) ?: 0,
-                    result.data?.getStringExtra(NEWSPAPER_MONTH) ?: ""
-                )
-                "Disc" -> Discs(
-                    result.data?.getIntExtra(ITEM_ID, 0) ?: 0,
-                    result.data?.getStringExtra(ITEM_NAME) ?: "",
-                    result.data?.getBooleanExtra(IS_AVAILABLE, true) ?: false,
-                    result.data?.getIntExtra(ITEM_IMAGE, 1) ?: 0,
-                    result.data?.getStringExtra(DISC_TYPE) ?: ""
-                )
-                else -> throw IllegalArgumentException("Неизвестный тип данных")
-            })
+                viewModel.addItem(newItem)
+            }
         }
     }
 
@@ -94,6 +93,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
         setContentView(binding.root)
+
+        viewModel.libraryItems.observe(this) { items ->
+            adapter.updateList(items)
+        }
 
         init()
     }
@@ -110,21 +113,21 @@ class MainActivity : AppCompatActivity() {
                 popup.setOnMenuItemClickListener { menuItem ->
                     when (menuItem.itemId) {
                         R.id.books -> {
-                            startForResult.launch(SecondActivity.createIntent(this@MainActivity).apply {
+                            startForResult.launch(InformationAboutItemsActivity.createIntent(this@MainActivity).apply {
                                 putExtra(ITEM_STATUS, true)
                                 putExtra(ITEM_TYPE, "Book")
                             })
                             true
                         }
                         R.id.newspapers -> {
-                            startForResult.launch(SecondActivity.createIntent(this@MainActivity).apply {
+                            startForResult.launch(InformationAboutItemsActivity.createIntent(this@MainActivity).apply {
                                 putExtra(ITEM_STATUS, true)
                                 putExtra(ITEM_TYPE, "Newspaper")
                             })
                             true
                         }
                         R.id.discs -> {
-                            startForResult.launch(SecondActivity.createIntent(this@MainActivity).apply {
+                            startForResult.launch(InformationAboutItemsActivity.createIntent(this@MainActivity).apply {
                                 putExtra(ITEM_STATUS, true)
                                 putExtra(ITEM_TYPE, "Disc")
                             })
@@ -150,6 +153,5 @@ class MainActivity : AppCompatActivity() {
         const val DISC_TYPE = "type"
         const val NEWSPAPER_NUMBER = "number"
         const val NEWSPAPER_MONTH = "month"
-        const val INDEX_DEFAULT_VALUE = -1
     }
 }

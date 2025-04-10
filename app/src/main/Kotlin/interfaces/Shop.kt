@@ -1,4 +1,4 @@
-package papka
+package interfaces
 
 import classes.library.LibraryItems
 

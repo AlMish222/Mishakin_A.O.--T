@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context=".SecondActivity">
+    tools:context=".InformationAboutItemsActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -21,11 +21,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0">
 
+
         <ImageView
             android:id="@+id/im"
             android:layout_width="93dp"
             android:layout_height="100dp"
-            android:layout_marginStart="140dp"
+            android:layout_gravity="center_horizontal"
             android:adjustViewBounds="true"
             android:foregroundGravity="center"
             android:src="@drawable/book1" />
@@ -34,14 +35,13 @@
             android:id="@+id/usersItem"
             android:layout_width="240dp"
             android:layout_height="60dp"
-            android:layout_marginStart="60dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
             android:gravity="center"
             android:text="@string/some_item"
             android:textColor="@color/black"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginTop="20dp"/>
-
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/nameEditText"
@@ -51,6 +51,7 @@
             android:autofillHints=""
             android:fontFamily="sans-serif-condensed"
             android:gravity="center"
+            android:layout_gravity="center_horizontal"
             android:inputType="text"
             android:padding="4dp"
             android:text=""
@@ -69,6 +70,7 @@
             android:autofillHints=""
             android:fontFamily="sans-serif-condensed"
             android:gravity="center"
+            android:layout_gravity="center_horizontal"
             android:inputType="text"
             android:padding="4dp"
             android:text=""
@@ -86,6 +88,7 @@
             android:autofillHints=""
             android:fontFamily="sans-serif-condensed"
             android:gravity="center"
+            android:layout_gravity="center_horizontal"
             android:inputType="text"
             android:padding="4dp"
             android:text=""
@@ -103,6 +106,7 @@
             android:autofillHints=""
             android:fontFamily="sans-serif-condensed"
             android:gravity="center"
+            android:layout_gravity="center_horizontal"
             android:inputType="text"
             android:padding="4dp"
             android:text=""
@@ -120,6 +124,7 @@
             android:autofillHints=""
             android:fontFamily="sans-serif-condensed"
             android:gravity="center"
+            android:layout_gravity="center_horizontal"
             android:inputType="text"
             android:padding="4dp"
             android:text=""
@@ -133,6 +138,7 @@
             android:id="@+id/saveButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="40dp"
             android:text="@string/save_new_element" />
 

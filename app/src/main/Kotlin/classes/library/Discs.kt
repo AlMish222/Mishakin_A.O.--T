@@ -1,7 +1,7 @@
 package classes.library
 
-import papka.TakeHome
-import papka.ReturnItem
+import interfaces.TakeHome
+import interfaces.ReturnItem
 
 data class Discs(
     override val id: Int,
