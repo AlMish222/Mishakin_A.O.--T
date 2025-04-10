@@ -12,6 +12,11 @@ class ItemsAdapter(
     private val onItemClickListener: ((LibraryItems) -> Unit)
 ): RecyclerView.Adapter<ItemsViewHolder>() {
 
+    fun updateList(newLibList: List<LibraryItems>) {
+        liblist.clear()
+        liblist.addAll(newLibList)
+        notifyDataSetChanged()
+    }
     fun setNewLibList(newLibList: MutableList<LibraryItems>) {
         liblist.clear()
         liblist.addAll(newLibList)

@@ -2,7 +2,7 @@ package classes
 
 import classes.library.Discs
 import com.example.dz_1.R
-import papka.Shop
+import interfaces.Shop
 
 class DiscsStore : Shop<Discs> {
     override fun toSell(): Discs {
