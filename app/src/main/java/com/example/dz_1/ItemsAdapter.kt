@@ -2,36 +2,14 @@ package com.example.dz_1
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ListAdapter
 import classes.library.LibraryItems
 import com.example.dz_1.databinding.LibraryItemsBinding
 
 
 class ItemsAdapter(
-    private val liblist: MutableList<LibraryItems>,
     private val onItemClickListener: ((LibraryItems) -> Unit)
-): RecyclerView.Adapter<ItemsViewHolder>() {
-
-    fun updateList(newLibList: List<LibraryItems>) {
-        liblist.clear()
-        liblist.addAll(newLibList)
-        notifyDataSetChanged()
-    }
-    fun setNewLibList(newLibList: MutableList<LibraryItems>) {
-        liblist.clear()
-        liblist.addAll(newLibList)
-        notifyDataSetChanged()
-    }
-
-    fun addLibListItem(items: LibraryItems) {
-        liblist.addAll(listOf(items)) //
-        notifyDataSetChanged()
-    }
-
-    fun deleteLibListItem(position: Int) {
-        liblist.removeAt(position)
-        notifyItemRemoved(position)
-    }
+): ListAdapter<LibraryItems, ItemsViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemsViewHolder {
         val view = LibraryItemsBinding.inflate(LayoutInflater.from(parent.context))
@@ -39,11 +17,9 @@ class ItemsAdapter(
     }
 
     override fun onBindViewHolder(holder: ItemsViewHolder, position: Int) {
-        holder.bind(liblist[position])
+        holder.bind(getItem(position))
         holder.itemView.setOnClickListener{
-            onItemClickListener(liblist[position])
+            onItemClickListener(getItem(position))
         }
     }
-
-    override fun getItemCount(): Int = liblist.size
 }
