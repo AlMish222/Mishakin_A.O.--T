@@ -9,6 +9,7 @@ import android.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dz_1.databinding.FragmentListBinding
 
 class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
@@ -22,7 +23,7 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentListBinding.inflate(inflater)
+        binding = FragmentListBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -45,9 +46,14 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
             rcView.adapter = adapter
         }
 
-        viewModel.scrollPosition.observe(viewLifecycleOwner) { position ->
-            (binding.rcView.layoutManager as GridLayoutManager)
-                .scrollToPositionWithOffset(position, 0)
+        viewModel.libraryItemsState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is MainViewModel.LibraryItemsState.ScrollPosition -> {
+                    (binding.rcView.layoutManager as GridLayoutManager)
+                        .scrollToPositionWithOffset(state.position, 0)
+                }
+                else -> Unit
+            }
         }
     }
 
@@ -59,17 +65,17 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
             popup.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.books -> {
-                        viewModel.selectNewItemTypeBook()
+                        viewModel.selectNewItemType(MainViewModel.Element.Book)
                         viewModel.startAddNewItem()
                         true
                     }
                     R.id.newspapers -> {
-                        viewModel.selectNewItemTypeNewspaper()
+                        viewModel.selectNewItemType(MainViewModel.Element.Newspaper)
                         viewModel.startAddNewItem()
                         true
                     }
                     R.id.discs -> {
-                        viewModel.selectNewItemTypeDisc()
+                        viewModel.selectNewItemType(MainViewModel.Element.Disc)
                         viewModel.startAddNewItem()
                         true
                     }
@@ -81,8 +87,11 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
     }
 
     private fun setObserver() {
-        viewModel.libraryItems.observe(viewLifecycleOwner) { libraryItems ->
-            adapter.submitList(libraryItems)
+        viewModel.libraryItemsState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is MainViewModel.LibraryItemsState.Items -> adapter.submitList(state.list)
+                else -> Unit
+            }
         }
     }
 
