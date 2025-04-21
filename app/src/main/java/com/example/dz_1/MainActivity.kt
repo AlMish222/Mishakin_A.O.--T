@@ -7,8 +7,11 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import classes.library.LibraryItems
 import com.example.dz_1.databinding.ActivityMainBinding
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,6 +27,7 @@ class MainActivity : AppCompatActivity() {
 
         setFragment()
         observeViewModel()
+        setShimmer()
 
         backCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -40,13 +44,28 @@ class MainActivity : AppCompatActivity() {
             .replace(R.id.fragment_container, ListOfItemsFragment()).commit()
     }
 
+    private fun setShimmer() {
+        lifecycleScope.launch {
+            viewModel.isLoading.collect {
+                if (viewModel.isLoading.value) {
+                    binding.shimmerContainer.visibility = View.VISIBLE
+                    binding.shimmerContainer.startShimmer()
+                    delay(3000)
+                } else {
+                    binding.shimmerContainer.stopShimmer()
+                    binding.shimmerContainer.visibility = View.GONE
+                }
+            }
+        }
+    }
+
     private fun observeViewModel() {
         viewModel.selectItem.observe(this) { item ->
             item?.let { showDetailsFragment(it) }
         }
 
         viewModel.informationFragmentVisibility.observe(this) { visibility ->
-            if (visibility == false) {
+            if (!visibility) {
                 if (isPortrait) {
                     if (supportFragmentManager.backStackEntryCount > 0) {
                         supportFragmentManager.popBackStack()
@@ -80,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun showDetailsFragment(items: LibraryItems) {
+    private fun showDetailsFragment(items: LibraryItems) {
         val fragment = DetailedInformationFragment.newInstance(items, false, null)
 
         if (isPortrait) {
@@ -115,7 +134,9 @@ class MainActivity : AppCompatActivity() {
 
         if (isNewPortrait != isPortrait) {
             isPortrait = isNewPortrait
-            setFragment()
+            lifecycleScope.launch {
+                setFragment()
+            }
             viewModel.selectItem.value?.let {
                 showDetailsFragment(it)
             } ?: viewModel.isAddNewItem.value?.takeIf { it }?.let {

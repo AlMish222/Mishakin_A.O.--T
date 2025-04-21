@@ -6,10 +6,14 @@ import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.dz_1.databinding.FragmentListBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
 
@@ -30,8 +34,9 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
         super.onViewCreated(view, savedInstanceState)
 
         setRecyclerView()
-        setAddButton()
         setObserver()
+        setAddButton()
+        setErrorHandler()
     }
 
     private fun setRecyclerView() {
@@ -81,8 +86,27 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
     }
 
     private fun setObserver() {
-        viewModel.libraryItems.observe(viewLifecycleOwner) { libraryItems ->
-            adapter.submitList(libraryItems)
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            viewModel.libraryItems.collect { items ->
+                adapter.submitList(items)
+            }
+        }
+    }
+
+    private fun setErrorHandler() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.error.collect { error ->
+                error?.let {
+                    AlertDialog.Builder(requireContext()).setTitle(viewModel.error.value)
+                        .setMessage("Попробуй ещё раз")
+                        .setPositiveButton("ОК") { _, _ ->
+                            if (viewModel.error.value == "Ошибка загрузки данных") {
+                                viewModel.loadItems()
+                            }
+                        }
+                        .show()
+                }
+            }
         }
     }
 
