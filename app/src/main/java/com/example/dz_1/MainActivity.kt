@@ -56,54 +56,58 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-//        viewModel.informationFragmentVisibility.observe(this) { visibility ->
-//            if (visibility == false) {
-//                if (isPortrait) {
-//                    if (supportFragmentManager.backStackEntryCount > 0) {
-//                        supportFragmentManager.popBackStack()
+//        viewModel.uiState.observe(this) { state ->
+//            when (state) {
+//                is MainViewModel.UIState.InformationFragmentVisibility -> {
+//                    if (!state.isVisible) {
+//                        if (isPortrait) {
+//                            if (supportFragmentManager.backStackEntryCount > 0) {
+//                                supportFragmentManager.popBackStack()
+//                            } else {
+//                                finish()
+//                            }
+//                        } else {
+//                            if (binding.informationFragmentContainer?.isVisible == true) {
+//                                binding.informationFragmentContainer!!.visibility = View.INVISIBLE
+//                            } else {
+//                                finish()
+//                            }
+//                        }
 //                    } else {
-//                        finish()
-//                    }
-//                } else {
-//                    if (binding.informationFragmentContainer?.isVisible == true) {
-//                        binding.informationFragmentContainer!!.visibility = View.INVISIBLE
-//                    } else {
-//                        finish()
+//                        if (binding.informationFragmentContainer?.isVisible == true) {
+//                            binding.informationFragmentContainer!!.visibility = View.VISIBLE
+//                        }
 //                    }
 //                }
-//            } else {
-//                if (binding.informationFragmentContainer?.isVisible == true) {
-//                    binding.informationFragmentContainer!!.visibility = View.VISIBLE
-//                }
+//                else -> Unit
 //            }
 //        }
+
+
+
+        var isFirstVisibilityEvent = true
 
         viewModel.uiState.observe(this) { state ->
             when (state) {
                 is MainViewModel.UIState.InformationFragmentVisibility -> {
+                    if (isFirstVisibilityEvent) {
+                        isFirstVisibilityEvent = false
+                        return@observe
+                    }
+
                     if (state.isVisible) {
-                        if (binding.informationFragmentContainer?.isVisible == true) {
-                            binding.informationFragmentContainer!!.visibility = View.VISIBLE
-                        }
+                        binding.informationFragmentContainer?.visibility = View.VISIBLE
                     } else {
                         if (isPortrait) {
                             if (supportFragmentManager.backStackEntryCount > 0) {
                                 supportFragmentManager.popBackStack()
-                            } else {
-                                finish()
                             }
                         } else {
-                            if (binding.informationFragmentContainer?.isVisible == true) {
-                                binding.informationFragmentContainer!!.visibility = View.INVISIBLE
-                            } else {
-                                finish()
-                            }
+                            binding.informationFragmentContainer?.visibility = View.INVISIBLE
                         }
                     }
                 }
-                else -> {
-                    Unit
-                }
+                else -> Unit
             }
         }
 
