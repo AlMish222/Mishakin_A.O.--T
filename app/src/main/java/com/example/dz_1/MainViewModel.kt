@@ -67,9 +67,9 @@ class MainViewModel : ViewModel() {
     }
 
     fun deleteItem(position: Int) {
-        val currentList = _libraryItems.value?.toMutableList()
-        currentList?.removeAt(position)
-        _libraryItems.value = currentList ?: emptyList()
+        val currentList = _libraryItems.value.toMutableList()
+        currentList.removeAt(position)
+        _libraryItems.value = currentList
     }
 
     fun addItem(items: LibraryItems) {
