@@ -54,4 +54,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.fragment.ktx)
+    implementation(libs.shimmer)
+    implementation (libs.jetbrains.kotlinx.coroutines.android)
 }

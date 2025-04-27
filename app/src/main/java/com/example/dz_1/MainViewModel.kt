@@ -1,96 +1,135 @@
 package com.example.dz_1
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import classes.library.LibraryItems
 import createLibraryItems
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 class MainViewModel : ViewModel() {
 
-    sealed class LibraryItemsState{
-        data class Items(val list: List<LibraryItems>): LibraryItemsState()
-        data class SelectedItem(val item: LibraryItems?): LibraryItemsState()
-        data class ScrollPosition(val position: Int): LibraryItemsState()
-    }
+    private val _libraryItems = MutableStateFlow<List<LibraryItems>>(emptyList())
+    val libraryItems: StateFlow<List<LibraryItems>> = _libraryItems
 
-    sealed class UIState{
-        data class AddNewItem(val isAdding: Boolean): UIState()
-        data class AddItemType(val type: String?): UIState()
-        data class CloseFragment(val shouldClose: Boolean): UIState()
-        data class InformationFragmentVisibility(val isVisible: Boolean): UIState()
-    }
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _libraryItemsState = MutableLiveData<LibraryItemsState>()
-    val libraryItemsState: LiveData<LibraryItemsState> = _libraryItemsState
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
 
-    private val _uiState = MutableLiveData<UIState>()
-    val uiState: LiveData<UIState> = _uiState
+    private val _isAddNewItem = MutableLiveData<Boolean>(false)
+    val isAddNewItem: LiveData<Boolean> = _isAddNewItem
 
+    private val _selectItem = MutableLiveData<LibraryItems?>()
+    val selectItem: LiveData<LibraryItems?> = _selectItem
+
+    private val _addItemType = MutableLiveData<String?>()
+    val addItemType: LiveData<String?> = _addItemType
+
+    private val _closeFragment = MutableLiveData<Boolean>(false)
+    val closeFragment: LiveData<Boolean> = _closeFragment
+
+    private val _scrollPosition = MutableLiveData<Int>(0)
+    val scrollPosition: LiveData<Int> = _scrollPosition
+
+    private val _informationFragmentVisibility = MutableLiveData<Boolean>()
+    val informationFragmentVisibility: LiveData<Boolean> = _informationFragmentVisibility
 
     init {
-        Log.d("ViewModel", "Initializing ViewModel")
-        _libraryItemsState.value = LibraryItemsState.Items(createLibraryItems()).also {
-            Log.d("ViewModel", "Initial items: ${it.list.size}")
-        }
-        _uiState.value = UIState.InformationFragmentVisibility(false)
+        _libraryItems.value = createLibraryItems()
     }
 
+    fun loadItems() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+
+            try {
+                delay(Random.nextLong(200, 2500))
+
+                if (Random.nextInt(4) == 0) {
+                    throw Exception("Ошибка загрузки")
+                }
+
+                _libraryItems.value = createLibraryItems()
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Произошла какая-то ошибка"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 
     fun deleteItem(position: Int) {
-        val currentList = (_libraryItemsState.value as? LibraryItemsState.Items)?.list?.toMutableList()
-            ?: mutableListOf()
+        val currentList = _libraryItems.value.toMutableList()
         currentList.removeAt(position)
-        _libraryItemsState.value = LibraryItemsState.Items(currentList)
+        _libraryItems.value = currentList
     }
 
     fun addItem(items: LibraryItems) {
-        val currentList = (_libraryItemsState.value as LibraryItemsState.Items)?.list?.toMutableList()
-            ?: mutableListOf()
-        currentList.add(items)
-        _libraryItemsState.value = LibraryItemsState.Items(currentList)
-        _uiState.value = UIState.AddNewItem(false)
-        _libraryItemsState.value = LibraryItemsState.ScrollPosition(currentList.size - 1)
+        val currentList = _libraryItems.value.toMutableList()
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+
+            try {
+                delay(Random.nextLong(100, 600))
+
+                if (Random.nextInt(4) == 0) {
+                    throw Exception("Ошибка сохранения данных")
+                }
+                currentList.add(items)
+                _libraryItems.value = currentList
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Произошла какая-то ошибка"
+            } finally {
+                _isLoading.value = false
+                _isAddNewItem.value = false
+            }
+        }
+        _isAddNewItem.value = false
+        _scrollPosition.value = currentList.size - 1
     }
 
     fun makeInformationInvisible() {
-        _uiState.value = UIState.InformationFragmentVisibility(false)
+        _informationFragmentVisibility.value = false
     }
 
     fun saveScrollPosition(position: Int) {
-        _libraryItemsState.value = LibraryItemsState.ScrollPosition(position)
+        _scrollPosition.value = position
     }
 
     fun closeFragment() {
-        _uiState.value = UIState.CloseFragment(true)
+        _closeFragment.value = true
     }
 
     fun selectItem(items: LibraryItems) {
-        _libraryItemsState.value = LibraryItemsState.SelectedItem(items)
-        _uiState.value = UIState.AddNewItem(false)
-        _uiState.value = UIState.InformationFragmentVisibility(true)
+        _selectItem.value = items
+        _isAddNewItem.value = false
+        _informationFragmentVisibility.value = true
     }
 
-    enum class Element(private val elementName: String){
-        Book("Book"),
-        Newspaper("Newspaper"),
-        Disc("Disc");
-
-        override fun toString() = elementName
+    fun selectNewItemTypeBook() {
+        _addItemType.value = "Book"
     }
 
-    fun selectNewItemType(element: Element){
-        when (element) {
-            Element.Book -> _uiState.value = UIState.AddItemType("Book")
-            Element.Newspaper -> _uiState.value = UIState.AddItemType("Newspaper")
-            Element.Disc -> _uiState.value = UIState.AddItemType("Disc")
-        }
+    fun selectNewItemTypeNewspaper() {
+        _addItemType.value = "Newspaper"
+    }
+
+    fun selectNewItemTypeDisc() {
+        _addItemType.value = "Disc"
     }
 
     fun startAddNewItem() {
-        _libraryItemsState.value = LibraryItemsState.SelectedItem(null)
-        _uiState.value = UIState.AddNewItem(true)
-        _uiState.value = UIState.InformationFragmentVisibility(true)
+        _selectItem.value = null
+        _isAddNewItem.value = true
+        _informationFragmentVisibility.value = true
     }
 }

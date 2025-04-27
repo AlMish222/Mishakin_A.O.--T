@@ -6,11 +6,14 @@ import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dz_1.databinding.FragmentListBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
 
@@ -23,7 +26,7 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentListBinding.inflate(inflater, container, false)
+        binding = FragmentListBinding.inflate(inflater)
         return binding.root
     }
 
@@ -31,8 +34,9 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
         super.onViewCreated(view, savedInstanceState)
 
         setRecyclerView()
-        setAddButton()
         setObserver()
+        setAddButton()
+        setErrorHandler()
     }
 
     private fun setRecyclerView() {
@@ -46,14 +50,9 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
             rcView.adapter = adapter
         }
 
-        viewModel.libraryItemsState.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is MainViewModel.LibraryItemsState.ScrollPosition -> {
-                    (binding.rcView.layoutManager as GridLayoutManager)
-                        .scrollToPositionWithOffset(state.position, 0)
-                }
-                else -> Unit
-            }
+        viewModel.scrollPosition.observe(viewLifecycleOwner) { position ->
+            (binding.rcView.layoutManager as GridLayoutManager)
+                .scrollToPositionWithOffset(position, 0)
         }
     }
 
@@ -65,17 +64,17 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
             popup.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.books -> {
-                        viewModel.selectNewItemType(MainViewModel.Element.Book)
+                        viewModel.selectNewItemTypeBook()
                         viewModel.startAddNewItem()
                         true
                     }
                     R.id.newspapers -> {
-                        viewModel.selectNewItemType(MainViewModel.Element.Newspaper)
+                        viewModel.selectNewItemTypeNewspaper()
                         viewModel.startAddNewItem()
                         true
                     }
                     R.id.discs -> {
-                        viewModel.selectNewItemType(MainViewModel.Element.Disc)
+                        viewModel.selectNewItemTypeDisc()
                         viewModel.startAddNewItem()
                         true
                     }
@@ -87,10 +86,26 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
     }
 
     private fun setObserver() {
-        viewModel.libraryItemsState.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is MainViewModel.LibraryItemsState.Items -> adapter.submitList(state.list)
-                else -> Unit
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            viewModel.libraryItems.collect { items ->
+                adapter.submitList(items)
+            }
+        }
+    }
+
+    private fun setErrorHandler() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.error.collect { error ->
+                error?.let {
+                    AlertDialog.Builder(requireContext()).setTitle(viewModel.error.value)
+                        .setMessage("Попробуй ещё раз")
+                        .setPositiveButton("ОК") { _, _ ->
+                            if (viewModel.error.value == "Ошибка загрузки данных") {
+                                viewModel.loadItems()
+                            }
+                        }
+                        .show()
+                }
             }
         }
     }

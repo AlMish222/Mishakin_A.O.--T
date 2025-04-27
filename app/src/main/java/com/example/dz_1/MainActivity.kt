@@ -2,16 +2,16 @@ package com.example.dz_1
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import classes.library.LibraryItems
 import com.example.dz_1.databinding.ActivityMainBinding
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,9 +25,9 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         setContentView(binding.root)
 
-
         setFragment()
         observeViewModel()
+        setShimmer()
 
         backCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -39,88 +39,62 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setFragment() {
-        if (supportFragmentManager.findFragmentById(R.id.fragment_container) == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.fragment_container, ListOfItemsFragment()).commit()
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, ListOfItemsFragment()).commit()
+    }
+
+    private fun setShimmer() {
+        lifecycleScope.launch {
+            viewModel.isLoading.collect {
+                if (viewModel.isLoading.value) {
+                    binding.shimmerContainer.visibility = View.VISIBLE
+                    binding.shimmerContainer.startShimmer()
+                    delay(3000)
+                } else {
+                    binding.shimmerContainer.stopShimmer()
+                    binding.shimmerContainer.visibility = View.GONE
+                }
+            }
         }
     }
 
     private fun observeViewModel() {
-        viewModel.libraryItemsState.observe(this) { state ->
-            when (state) {
-                is MainViewModel.LibraryItemsState.SelectedItem -> {
-                    state.item?.let { showDetailsFragment(it) }
-                }
-                else -> Unit
-            }
+        viewModel.selectItem.observe(this) { item ->
+            item?.let { showDetailsFragment(it) }
         }
 
-//        viewModel.uiState.observe(this) { state ->
-//            when (state) {
-//                is MainViewModel.UIState.InformationFragmentVisibility -> {
-//                    if (!state.isVisible) {
-//                        if (isPortrait) {
-//                            if (supportFragmentManager.backStackEntryCount > 0) {
-//                                supportFragmentManager.popBackStack()
-//                            } else {
-//                                finish()
-//                            }
-//                        } else {
-//                            if (binding.informationFragmentContainer?.isVisible == true) {
-//                                binding.informationFragmentContainer!!.visibility = View.INVISIBLE
-//                            } else {
-//                                finish()
-//                            }
-//                        }
-//                    } else {
-//                        if (binding.informationFragmentContainer?.isVisible == true) {
-//                            binding.informationFragmentContainer!!.visibility = View.VISIBLE
-//                        }
-//                    }
-//                }
-//                else -> Unit
-//            }
-//        }
-
-
-
-        var isFirstVisibilityEvent = true
-
-        viewModel.uiState.observe(this) { state ->
-            when (state) {
-                is MainViewModel.UIState.InformationFragmentVisibility -> {
-                    if (isFirstVisibilityEvent) {
-                        isFirstVisibilityEvent = false
-                        return@observe
-                    }
-
-                    if (state.isVisible) {
-                        binding.informationFragmentContainer?.visibility = View.VISIBLE
-                    } else {
-                        if (isPortrait) {
-                            if (supportFragmentManager.backStackEntryCount > 0) {
-                                supportFragmentManager.popBackStack()
-                            }
-                        } else {
-                            binding.informationFragmentContainer?.visibility = View.INVISIBLE
-                        }
-                    }
-                }
-                else -> Unit
-            }
-        }
-
-        viewModel.uiState.observe(this) { state ->
-            when (state) {
-                is MainViewModel.UIState.AddNewItem -> {
-                    if (state.isAdding) {
-                        addNewItemFragment()
-                    } else {
+        viewModel.informationFragmentVisibility.observe(this) { visibility ->
+            if (!visibility) {
+                if (isPortrait) {
+                    if (supportFragmentManager.backStackEntryCount > 0) {
                         supportFragmentManager.popBackStack()
+                    } else {
+                        finish()
+                    }
+                } else {
+                    if (binding.informationFragmentContainer?.isVisible == true) {
+                        binding.informationFragmentContainer!!.visibility = View.INVISIBLE
+                    } else {
+                        finish()
                     }
                 }
-                else -> Unit
+            } else {
+                if (binding.informationFragmentContainer?.isVisible == true) {
+                    binding.informationFragmentContainer!!.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        viewModel.isAddNewItem.observe(this) { isAdd ->
+            if (isAdd) {
+                addNewItemFragment()
+            }
+        }
+
+        viewModel.isAddNewItem.observe(this) { closeFragment ->
+            if (closeFragment) {
+                supportFragmentManager.popBackStack()
             }
         }
     }
@@ -141,18 +115,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addNewItemFragment() {
-        val addItemType = (viewModel.uiState.value as? MainViewModel.UIState.AddItemType)?.type
-
         if (isPortrait) {
             supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.fragment_container,
-                    DetailedInformationFragment.newInstance(null, true, addItemType))
+                    DetailedInformationFragment.newInstance(null, true, viewModel.addItemType.value))
                 .addToBackStack(null).commit()
         } else {
-            supportFragmentManager.beginTransaction().replace(
-                R.id.information_fragment_container,
-                DetailedInformationFragment.newInstance(null, true, addItemType)).commit()
+            supportFragmentManager.beginTransaction().replace(R.id
+                .information_fragment_container, DetailedInformationFragment.newInstance(null,
+                true, viewModel.addItemType.value)).commit()
         }
     }
 
@@ -162,17 +134,13 @@ class MainActivity : AppCompatActivity() {
 
         if (isNewPortrait != isPortrait) {
             isPortrait = isNewPortrait
-            setFragment()
-
-            when {
-                (viewModel.libraryItemsState.value as? MainViewModel.LibraryItemsState
-                    .SelectedItem)?.item != null -> {
-                        val selectedItem = (viewModel.libraryItemsState.value as MainViewModel
-                            .LibraryItemsState.SelectedItem).item
-                        if (selectedItem != null) { showDetailsFragment(selectedItem) }
-                    }
-                (viewModel.uiState.value as? MainViewModel.UIState.AddNewItem)?.isAdding == true
-                    -> { addNewItemFragment() }
+            lifecycleScope.launch {
+                setFragment()
+            }
+            viewModel.selectItem.value?.let {
+                showDetailsFragment(it)
+            } ?: viewModel.isAddNewItem.value?.takeIf { it }?.let {
+                addNewItemFragment()
             }
         }
     }
