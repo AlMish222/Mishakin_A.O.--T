@@ -44,28 +44,84 @@ class MainViewModel(
     private val _informationFragmentVisibility = MutableLiveData<Boolean>()
     val informationFragmentVisibility: LiveData<Boolean> = _informationFragmentVisibility
 
+    private var currentOffset = 0
+    private val pageSize = 16
+
     init {
         viewModelScope.launch {
-            val items = repository.loadAllItems()
-            if (items.isEmpty()) {
-                createLibraryItems().forEach {
-                    repository.insertItem(it)
-                }
-            }
-            loadItems()
+            initializePage()
         }
     }
 
-    fun loadItems() {
+    private suspend fun initializePage() {
+        _isLoading.value = true
+        try {
+            val items = repository.loadAllItems()
+            if (items.isEmpty()) {
+                createLibraryItems().forEach{
+                    repository.insertItem(it)
+                }
+            }
+            loadInitialPage()
+        } catch (e: Exception) {
+            _error.value = e.message ?: "Ошибка инициализации базы"
+        } finally {
+            _isLoading.value = false
+        }
+    }
+
+    fun loadInitialPage() {
         viewModelScope.launch {
             _isLoading.value = true
-            _error.value = null
+
             try {
                 delay(Random.nextLong(200, 2500))
-                _libraryItems.value = repository.loadAllItems()
-
+                _libraryItems.value = repository.loadInitialPage()
             } catch (e: Exception) {
-                _error.value = e.message ?: "Произошла какая-то ошибка"
+                _error.value = e.message ?: "Ошибка загрузки данных"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun loadNextPage() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                delay(500)
+                val newItems = repository.loadNextPage()
+                _libraryItems.value = _libraryItems.value + newItems
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Ошибка загрузки следующей страницы"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun loadPreviousPage() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                delay(500)
+                val newItems = repository.loadPreviousPage()
+                _libraryItems.value = newItems
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Ошибка загрузки предыдущей страницы"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun refreshItems() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                _libraryItems.value = repository.refreshPage()
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Ошибка обновления списка"
             } finally {
                 _isLoading.value = false
             }
@@ -75,11 +131,11 @@ class MainViewModel(
     fun deleteItem(position: Int) {
         viewModelScope.launch {
             try {
-                val itemToDelete = _libraryItems.value[position]
-                repository.deleteItem(itemToDelete.id)
-
-                _libraryItems.value = repository.loadAllItems()
-
+                val itemToDelete = _libraryItems.value.getOrNull(position)
+                itemToDelete?.let {
+                    repository.deleteItem(it.id)
+                    refreshItems()
+                }
             } catch (e: Exception) {
                 _error.value = "Не удалось удалить элемент"
             }

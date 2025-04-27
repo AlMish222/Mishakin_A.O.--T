@@ -19,7 +19,10 @@ class MainActivity : AppCompatActivity() {
 
     private val binding by lazy {ActivityMainBinding.inflate(layoutInflater)}
     private val viewModel: MainViewModel by viewModels {
-        MainViewModelFactory(LibraryRepository(FirstDB.getDb(this).getDao()))
+        MainViewModelFactory(
+            LibraryRepository(FirstDB.getDb(this).getDao(),
+            SettingsManager(this)
+        ))
     }
 
     private var isPortrait = true
@@ -57,10 +60,27 @@ class MainActivity : AppCompatActivity() {
                 if (isLoading) {
                     binding.shimmerContainer.visibility = View.VISIBLE
                     binding.shimmerContainer.startShimmer()
-                    delay(3000)
+
+                    delay(2000)
+
+                    binding.fragmentContainer.visibility = View.GONE
+                    binding.emptyText?.visibility = View.GONE
+
                 } else {
+                    delay(1200)
+
                     binding.shimmerContainer.stopShimmer()
                     binding.shimmerContainer.visibility = View.GONE
+
+                    val items = viewModel.libraryItems.value
+
+                    if (items.isEmpty()) {
+                        binding.emptyText?.visibility = View.VISIBLE
+                        binding.fragmentContainer.visibility = View.GONE
+                    } else {
+                        binding.emptyText?.visibility = View.GONE
+                        binding.fragmentContainer.visibility = View.VISIBLE
+                    }
                 }
             }
         }

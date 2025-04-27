@@ -10,7 +10,7 @@ import interfaces.LibraryDao
 
 @Database(
     entities = [UniversalItemClass_BD::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Convertor_BD::class)
@@ -28,7 +28,9 @@ abstract class FirstDB : RoomDatabase() {
                     context.applicationContext,
                     FirstDB::class.java,
                     "test.db"
-                ).build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }

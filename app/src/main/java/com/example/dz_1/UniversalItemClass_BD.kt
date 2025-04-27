@@ -6,9 +6,7 @@ import classes.library.Books
 import classes.library.Discs
 import classes.library.LibraryItems
 import classes.library.Newspapers
-import interfaces.ReadInLibrary
-import interfaces.ReturnItem
-import interfaces.TakeHome
+
 
 @Entity(tableName = "library_items")
 data class UniversalItemClass_BD(
@@ -87,11 +85,7 @@ fun UniversalItemClass_BD.toDomainItem(): LibraryItems = when(itemType) {
         imageId = imageId,
         author = author ?: "",
         pages = pages ?: 0
-    ).apply {
-//        this as TakeHome
-//        this as ReturnItem
-//        this as ReadInLibrary
-    }
+    )
 
     EnumClass_BD.NEWSPAPER -> Newspapers(
         id = id,
@@ -100,10 +94,7 @@ fun UniversalItemClass_BD.toDomainItem(): LibraryItems = when(itemType) {
         imageId = imageId,
         number = number ?: 0,
         month = month ?: ""
-    ).apply {
-//        this as ReturnItem
-//        this as ReadInLibrary
-    }
+    )
 
     EnumClass_BD.DISC -> Discs(
         id = id,
@@ -111,9 +102,6 @@ fun UniversalItemClass_BD.toDomainItem(): LibraryItems = when(itemType) {
         isAvailable = isAvailable,
         imageId = imageId,
         type = discType ?: ""
-    ).apply {
-//        this as TakeHome
-//        this as ReturnItem
-    }
+    )
 }
 

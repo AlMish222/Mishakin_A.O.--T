@@ -6,43 +6,26 @@ import classes.library.LibraryItems
 import classes.library.Newspapers
 import interfaces.LibraryDao
 
-class LibraryRepository(private val dao: LibraryDao) {
+class LibraryRepository(
+    private val dao: LibraryDao,
+    private val settingsManager: SettingsManager
+) {
+
+    private var currentOffset = 0
+    private val pageSize = 16
 
     suspend fun saveBooks(books: Books) {
-        val items = UniversalItemClass_BD(
-            id = books.id,
-            name = books.name,
-            isAvailable = books.isAvailable,
-            imageId = books.imageId,
-            itemType = EnumClass_BD.BOOK,
-            author = books.author,
-            pages = books.pages,
-        )
+        val items = books.toUniversalItem()
         dao.insertItem(items)
     }
 
     suspend fun saveNewspapers(newspapers: Newspapers) {
-        val items = UniversalItemClass_BD(
-            id = newspapers.id,
-            name = newspapers.name,
-            isAvailable = newspapers.isAvailable,
-            imageId = newspapers.imageId,
-            itemType = EnumClass_BD.NEWSPAPER,
-            number = newspapers.number,
-            month = newspapers.month
-        )
+        val items = newspapers.toUniversalItem()
         dao.insertItem(items)
     }
 
     suspend fun saveDiscs(discs: Discs) {
-        val items = UniversalItemClass_BD(
-            id = discs.id,
-            name = discs.name,
-            isAvailable = discs.isAvailable,
-            imageId = discs.imageId,
-            itemType = EnumClass_BD.DISC,
-            discType = discs.type
-        )
+        val items = discs.toUniversalItem()
         dao.insertItem(items)
     }
 
@@ -64,5 +47,48 @@ class LibraryRepository(private val dao: LibraryDao) {
             is Newspapers -> dao.insertItem(items.toUniversalItem())
             is Discs -> dao.insertItem(items.toUniversalItem())
         }
+    }
+
+    suspend fun loadInitialPage(): List<LibraryItems> {
+        currentOffset = 0
+        val sortType = settingsManager.getSortType()
+        val items = when (sortType) {
+            SortType.BY_NAME -> dao.getAllSortedByName(pageSize, currentOffset)
+            SortType.BY_ID -> dao.getAllSortedById(pageSize, currentOffset)
+        }
+        return items.map { it.toDomainItem() }
+    }
+
+    suspend fun loadNextPage(): List<LibraryItems> {
+        val sortType = settingsManager.getSortType()
+        currentOffset += pageSize / 2
+        val items = when (sortType) {
+            SortType.BY_NAME -> dao.getAllSortedByName(pageSize / 2, currentOffset)
+            SortType.BY_ID -> dao.getAllSortedById(pageSize / 2, currentOffset)
+        }
+        return items.map { it.toDomainItem() }
+    }
+
+    suspend fun loadPreviousPage(): List<LibraryItems> {
+        val sortType = settingsManager.getSortType()
+        currentOffset = (currentOffset - pageSize / 2).coerceAtLeast(0)
+        val items = when (sortType) {
+            SortType.BY_NAME -> dao.getAllSortedByName(pageSize / 2, currentOffset)
+            SortType.BY_ID -> dao.getAllSortedById(pageSize / 2, currentOffset)
+        }
+        return items.map { it.toDomainItem() }
+    }
+
+    suspend fun refreshPage(): List<LibraryItems> {
+        currentOffset = 0
+        return loadInitialPage()
+    }
+
+    fun saveSortType(sortType: SortType) {
+        settingsManager.saveSortType(sortType)
+    }
+
+    fun getSortType(): SortType {
+        return settingsManager.getSortType()
     }
 }
