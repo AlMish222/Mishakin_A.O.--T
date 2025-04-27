@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id ("kotlin-kapt")
 }
 
 android {
@@ -26,10 +27,18 @@ android {
             )
         }
     }
+
+    configurations.all{
+        resolutionStrategy{
+            force("org.jetbrains:annotations:23.0.0")
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
@@ -56,4 +65,7 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.shimmer)
     implementation (libs.jetbrains.kotlinx.coroutines.android)
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
 }

@@ -1,5 +1,8 @@
 package classes.library
 
+import androidx.room.Entity
+
+@Entity(tableName = "library_items")
 abstract class LibraryItems(
     open val id: Int,
     open val name: String,
