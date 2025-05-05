@@ -3,6 +3,7 @@ package com.example.dz_1
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import classes.library.LibraryItems
 import createLibraryItems
@@ -12,11 +13,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
-class MainViewModel : ViewModel() {
-
+class MainViewModel(
+    private val repository: LibraryRepository
+) : ViewModel() {
+//
     private val _libraryItems = MutableStateFlow<List<LibraryItems>>(emptyList())
     val libraryItems: StateFlow<List<LibraryItems>> = _libraryItems
-
+//
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -41,25 +44,84 @@ class MainViewModel : ViewModel() {
     private val _informationFragmentVisibility = MutableLiveData<Boolean>()
     val informationFragmentVisibility: LiveData<Boolean> = _informationFragmentVisibility
 
+    private var currentOffset = 0
+    private val pageSize = 16
+
     init {
-        _libraryItems.value = createLibraryItems()
+        viewModelScope.launch {
+            initializePage()
+        }
     }
 
-    fun loadItems() {
+    private suspend fun initializePage() {
+        _isLoading.value = true
+        try {
+            val items = repository.loadAllItems()
+            if (items.isEmpty()) {
+                createLibraryItems().forEach{
+                    repository.insertItem(it)
+                }
+            }
+            loadInitialPage()
+        } catch (e: Exception) {
+            _error.value = e.message ?: "Ошибка инициализации базы"
+        } finally {
+            _isLoading.value = false
+        }
+    }
+
+    fun loadInitialPage() {
         viewModelScope.launch {
             _isLoading.value = true
-            _error.value = null
 
             try {
                 delay(Random.nextLong(200, 2500))
-
-                if (Random.nextInt(4) == 0) {
-                    throw Exception("Ошибка загрузки")
-                }
-
-                _libraryItems.value = createLibraryItems()
+                _libraryItems.value = repository.loadInitialPage()
             } catch (e: Exception) {
-                _error.value = e.message ?: "Произошла какая-то ошибка"
+                _error.value = e.message ?: "Ошибка загрузки данных"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun loadNextPage() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                delay(500)
+                val newItems = repository.loadNextPage()
+                _libraryItems.value = _libraryItems.value + newItems
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Ошибка загрузки следующей страницы"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun loadPreviousPage() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                delay(500)
+                val newItems = repository.loadPreviousPage()
+                _libraryItems.value = newItems
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Ошибка загрузки предыдущей страницы"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun refreshItems() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                _libraryItems.value = repository.refreshPage()
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Ошибка обновления списка"
             } finally {
                 _isLoading.value = false
             }
@@ -67,13 +129,20 @@ class MainViewModel : ViewModel() {
     }
 
     fun deleteItem(position: Int) {
-        val currentList = _libraryItems.value.toMutableList()
-        currentList.removeAt(position)
-        _libraryItems.value = currentList
+        viewModelScope.launch {
+            try {
+                val itemToDelete = _libraryItems.value.getOrNull(position)
+                itemToDelete?.let {
+                    repository.deleteItem(it.id)
+                    refreshItems()
+                }
+            } catch (e: Exception) {
+                _error.value = "Не удалось удалить элемент"
+            }
+        }
     }
 
     fun addItem(items: LibraryItems) {
-        val currentList = _libraryItems.value.toMutableList()
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
@@ -84,17 +153,18 @@ class MainViewModel : ViewModel() {
                 if (Random.nextInt(4) == 0) {
                     throw Exception("Ошибка сохранения данных")
                 }
-                currentList.add(items)
-                _libraryItems.value = currentList
+
+                repository.insertItem(items)
+                _libraryItems.value = repository.loadAllItems()
+                _scrollPosition.value = _libraryItems.value.size - 1
+
             } catch (e: Exception) {
-                _error.value = e.message ?: "Произошла какая-то ошибка"
+                _error.value = "Ошибка добавления"
             } finally {
                 _isLoading.value = false
                 _isAddNewItem.value = false
             }
         }
-        _isAddNewItem.value = false
-        _scrollPosition.value = currentList.size - 1
     }
 
     fun makeInformationInvisible() {
@@ -131,5 +201,14 @@ class MainViewModel : ViewModel() {
         _selectItem.value = null
         _isAddNewItem.value = true
         _informationFragmentVisibility.value = true
+    }
+}
+
+class MainViewModelFactory(private val repository: LibraryRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+            return MainViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Неизвестный ViewModel class")
     }
 }

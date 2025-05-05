@@ -2,6 +2,7 @@ package com.example.dz_1
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
@@ -11,14 +12,22 @@ import androidx.lifecycle.lifecycleScope
 import classes.library.LibraryItems
 import com.example.dz_1.databinding.ActivityMainBinding
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private val binding by lazy {ActivityMainBinding.inflate(layoutInflater)}
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels {
+        MainViewModelFactory(
+            LibraryRepository(FirstDB.getDb(this).getDao(),
+            SettingsManager(this)
+        ))
+    }
+
     private var isPortrait = true
     private lateinit var backCallback: OnBackPressedCallback
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         }
         onBackPressedDispatcher.addCallback(this, backCallback)
         isPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+
     }
 
     private fun setFragment() {
@@ -46,14 +56,31 @@ class MainActivity : AppCompatActivity() {
 
     private fun setShimmer() {
         lifecycleScope.launch {
-            viewModel.isLoading.collect {
-                if (viewModel.isLoading.value) {
+            viewModel.isLoading.collect { isLoading ->
+                if (isLoading) {
                     binding.shimmerContainer.visibility = View.VISIBLE
                     binding.shimmerContainer.startShimmer()
-                    delay(3000)
+
+                    delay(2000)
+
+                    binding.fragmentContainer.visibility = View.GONE
+                    binding.emptyText?.visibility = View.GONE
+
                 } else {
+                    delay(1200)
+
                     binding.shimmerContainer.stopShimmer()
                     binding.shimmerContainer.visibility = View.GONE
+
+                    val items = viewModel.libraryItems.value
+
+                    if (items.isEmpty()) {
+                        binding.emptyText?.visibility = View.VISIBLE
+                        binding.fragmentContainer.visibility = View.GONE
+                    } else {
+                        binding.emptyText?.visibility = View.GONE
+                        binding.fragmentContainer.visibility = View.VISIBLE
+                    }
                 }
             }
         }
@@ -66,23 +93,9 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.informationFragmentVisibility.observe(this) { visibility ->
             if (!visibility) {
-                if (isPortrait) {
-                    if (supportFragmentManager.backStackEntryCount > 0) {
-                        supportFragmentManager.popBackStack()
-                    } else {
-                        finish()
-                    }
-                } else {
-                    if (binding.informationFragmentContainer?.isVisible == true) {
-                        binding.informationFragmentContainer!!.visibility = View.INVISIBLE
-                    } else {
-                        finish()
-                    }
-                }
+                handleInformationFragmentInvisible()
             } else {
-                if (binding.informationFragmentContainer?.isVisible == true) {
-                    binding.informationFragmentContainer!!.visibility = View.VISIBLE
-                }
+                binding.informationFragmentContainer?.visibility = View.VISIBLE
             }
         }
 
@@ -95,6 +108,28 @@ class MainActivity : AppCompatActivity() {
         viewModel.isAddNewItem.observe(this) { closeFragment ->
             if (closeFragment) {
                 supportFragmentManager.popBackStack()
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.libraryItems.collect { items ->
+                Log.d("MainActivity", "Получено элементов из базы: ${items.size}")
+            }
+        }
+    }
+
+    private fun handleInformationFragmentInvisible() {
+        if (isPortrait) {
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                supportFragmentManager.popBackStack()
+            } else {
+                finish()
+            }
+        } else {
+            if (binding.informationFragmentContainer?.isVisible == true) {
+                binding.informationFragmentContainer?.visibility = View.INVISIBLE
+            } else {
+                finish()
             }
         }
     }

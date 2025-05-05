@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.dz_1.databinding.FragmentListBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,6 +49,20 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
         binding.apply {
             rcView.layoutManager = GridLayoutManager(context, 1)
             rcView.adapter = adapter
+
+            rcView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    val layoutManager = recyclerView.layoutManager as GridLayoutManager
+                    val totalItemCount = layoutManager.itemCount
+                    val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+
+                    if (lastVisibleItemPosition + 3 >= totalItemCount) {
+                        viewModel.loadNextPage()
+                    }
+                }
+            })
         }
 
         viewModel.scrollPosition.observe(viewLifecycleOwner) { position ->
@@ -101,7 +116,7 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
                         .setMessage("Попробуй ещё раз")
                         .setPositiveButton("ОК") { _, _ ->
                             if (viewModel.error.value == "Ошибка загрузки данных") {
-                                viewModel.loadItems()
+                                viewModel.loadInitialPage()
                             }
                         }
                         .show()
