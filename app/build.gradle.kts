@@ -67,5 +67,13 @@ dependencies {
     implementation (libs.jetbrains.kotlinx.coroutines.android)
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+    //implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation(libs.retrofit)
+    //implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.converter.gson)
+    //implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation(libs.okhttp)
+    //implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.gson)
 
 }
