@@ -12,14 +12,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random
+import classes.GoogleBookItem
+import classes.library.Books
+import retrofit2.HttpException
+import java.io.IOException
 
 class MainViewModel(
     private val repository: LibraryRepository
 ) : ViewModel() {
-//
+
     private val _libraryItems = MutableStateFlow<List<LibraryItems>>(emptyList())
     val libraryItems: StateFlow<List<LibraryItems>> = _libraryItems
-//
+
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -44,12 +48,36 @@ class MainViewModel(
     private val _informationFragmentVisibility = MutableLiveData<Boolean>()
     val informationFragmentVisibility: LiveData<Boolean> = _informationFragmentVisibility
 
+    private val _googleBooks = MutableStateFlow<List<Books>>(emptyList())
+    val googleBooks: StateFlow<List<Books>> = _googleBooks
+
     private var currentOffset = 0
     private val pageSize = 16
+
 
     init {
         viewModelScope.launch {
             initializePage()
+        }
+    }
+
+    fun loadBooks(query: String? = null) {
+        viewModelScope.launch {
+            _libraryItems.value = repository.loadAllItems()
+
+            if (!query.isNullOrEmpty()) {
+                loadGoogleBooks("", query)
+            }
+        }
+    }
+
+    private suspend fun loadGoogleBooks(query: String, query1: String) {
+        try {
+            val booksFromGoogle = repository.searchBooks(query)
+            _googleBooks.value = booksFromGoogle as List<Books>
+            _libraryItems.value += booksFromGoogle
+        } catch (e: Exception) {
+            _error.value = "Ошибка загрузки книг из Google Books"
         }
     }
 
@@ -73,7 +101,6 @@ class MainViewModel(
     fun loadInitialPage() {
         viewModelScope.launch {
             _isLoading.value = true
-
             try {
                 delay(Random.nextLong(200, 2500))
                 _libraryItems.value = repository.loadInitialPage()
@@ -91,7 +118,7 @@ class MainViewModel(
             try {
                 delay(500)
                 val newItems = repository.loadNextPage()
-                _libraryItems.value = _libraryItems.value + newItems
+                _libraryItems.value += newItems
             } catch (e: Exception) {
                 _error.value = e.message ?: "Ошибка загрузки следующей страницы"
             } finally {
@@ -201,6 +228,54 @@ class MainViewModel(
         _selectItem.value = null
         _isAddNewItem.value = true
         _informationFragmentVisibility.value = true
+    }
+
+    fun searchGoogleBooks(author: String, title: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                val query = buildGoogleBooksQuery(title, author)
+                val response = RetrofitInstance.googleBooksApi.searchBooks(
+                    query =query,
+                    apiKey = RetrofitInstance.apiKey,
+                    maxResults = 20
+                )
+
+                if (response.isSuccessful) {
+                    val items = response.body()?.items ?: emptyList()
+                    _googleBooks.value = items.map { it.toBooks() }
+                } else {
+                    _error.value = "Ошибка ответа от Google Books API"
+                    _googleBooks.value = emptyList()
+                }
+            } catch (e: IOException) {
+                _error.value = "Ошибка сети"
+                _googleBooks.value = emptyList()
+            } catch (e: HttpException) {
+                _error.value = "HTTP ошибка: ${e.code()}"
+                _googleBooks.value = emptyList()
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    private fun buildGoogleBooksQuery(title: String, author: String): String {
+        val titleQuery = if (title.isNotBlank()) "intitle:$title" else ""
+        val authorQuery = if (author.isNotBlank()) "inauthor:$author" else ""
+        return listOf(titleQuery, authorQuery).filter { it.isNotBlank() }.joinToString("+")
+    }
+
+    private fun GoogleBookItem.toBooks(): Books {
+        return Books(
+            id = this.id.hashCode(),
+            name = this.volumeInfo.title ?: "Без названия",
+            isAvailable = true,
+            imageId = 0,
+            author = this.volumeInfo.authors?.joinToString(", ") ?: "Автор не указан",
+            pages = this.volumeInfo.pageCount ?: 0,
+        )
     }
 }
 

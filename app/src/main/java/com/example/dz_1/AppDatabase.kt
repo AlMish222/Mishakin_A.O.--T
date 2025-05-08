@@ -14,19 +14,19 @@ import interfaces.LibraryDao
     exportSchema = false
 )
 @TypeConverters(Convertor_BD::class)
-abstract class FirstDB : RoomDatabase() {
+abstract class Library_DB : RoomDatabase() {
 
     abstract fun getDao(): LibraryDao
 
     companion object{
         @Volatile
-        private var INSTANCE: FirstDB? = null
+        private var INSTANCE: Library_DB? = null
 
-        fun getDb(context: Context): FirstDB{
+        fun getDb(context: Context): Library_DB{
             return INSTANCE ?: synchronized(this){
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
-                    FirstDB::class.java,
+                    Library_DB::class.java,
                     "test.db"
                 )
                 .fallbackToDestructiveMigration()

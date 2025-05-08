@@ -15,7 +15,7 @@ data class UniversalItemClass_BD(
     val name: String,
     val isAvailable: Boolean,
     val imageId: Int,
-    val itemType: EnumClass_BD,
+    val itemType: TypeOfElement,
 
     val author: String? = null,
     val pages: Int? = null,
@@ -26,7 +26,7 @@ data class UniversalItemClass_BD(
     val discType: String? = null
 )
 
-enum class EnumClass_BD {
+enum class TypeOfElement {
     BOOK,
     NEWSPAPER,
     DISC
@@ -38,7 +38,7 @@ fun Books.toUniversalItem(): UniversalItemClass_BD {
         name = this.name,
         isAvailable = this.isAvailable,
         imageId = this.imageId,
-        itemType = EnumClass_BD.BOOK,
+        itemType = TypeOfElement.BOOK,
         author = this.author,
         pages = this.pages,
         number = null,
@@ -53,7 +53,7 @@ fun Newspapers.toUniversalItem(): UniversalItemClass_BD {
         name = this.name,
         isAvailable = this.isAvailable,
         imageId = this.imageId,
-        itemType = EnumClass_BD.NEWSPAPER,
+        itemType = TypeOfElement.NEWSPAPER,
         number = this.number,
         month = this.month,
         author = null,
@@ -68,7 +68,7 @@ fun Discs.toUniversalItem(): UniversalItemClass_BD {
         name = this.name,
         isAvailable = this.isAvailable,
         imageId = this.imageId,
-        itemType = EnumClass_BD.DISC,
+        itemType = TypeOfElement.DISC,
         discType = this.type,
         author = null,
         pages = null,
@@ -78,7 +78,7 @@ fun Discs.toUniversalItem(): UniversalItemClass_BD {
 }
 
 fun UniversalItemClass_BD.toDomainItem(): LibraryItems = when(itemType) {
-    EnumClass_BD.BOOK -> Books(
+    TypeOfElement.BOOK -> Books(
         id = id,
         name = name,
         isAvailable = isAvailable,
@@ -87,7 +87,7 @@ fun UniversalItemClass_BD.toDomainItem(): LibraryItems = when(itemType) {
         pages = pages ?: 0
     )
 
-    EnumClass_BD.NEWSPAPER -> Newspapers(
+    TypeOfElement.NEWSPAPER -> Newspapers(
         id = id,
         name = name,
         isAvailable = isAvailable,
@@ -96,7 +96,7 @@ fun UniversalItemClass_BD.toDomainItem(): LibraryItems = when(itemType) {
         month = month ?: ""
     )
 
-    EnumClass_BD.DISC -> Discs(
+    TypeOfElement.DISC -> Discs(
         id = id,
         name = name,
         isAvailable = isAvailable,

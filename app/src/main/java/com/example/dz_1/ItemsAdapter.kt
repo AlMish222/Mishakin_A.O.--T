@@ -8,7 +8,7 @@ import com.example.dz_1.databinding.LibraryItemsBinding
 
 
 class ItemsAdapter(
-    private val onItemClickListener: ((LibraryItems) -> Unit)
+    private val onItemClickListener: (LibraryItems) -> Unit
 ): ListAdapter<LibraryItems, ItemsViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemsViewHolder {

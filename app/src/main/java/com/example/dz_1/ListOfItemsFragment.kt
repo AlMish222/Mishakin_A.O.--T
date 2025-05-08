@@ -1,33 +1,52 @@
 package com.example.dz_1
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import classes.library.Books
+import classes.library.LibraryItems
 import com.example.dz_1.databinding.FragmentListBinding
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
 
     private lateinit var binding: FragmentListBinding
     private lateinit var adapter: ItemsAdapter
-    private val viewModel: MainViewModel by activityViewModels()
+    private lateinit var viewModel: MainViewModel
+
+    private var isGoogleBooksMode = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentListBinding.inflate(inflater)
+        binding = FragmentListBinding.inflate(inflater, container, false)
+
+        val repository = LibraryRepository(
+            Library_DB.getDb(requireContext()).getDao(),
+            SettingsManager(requireContext()),
+            RetrofitInstance.googleBooksApi
+        )
+        viewModel = ViewModelProvider(this, MainViewModelFactory(repository)).get(MainViewModel::class.java)
+
+        viewModel.loadBooks()
+
         return binding.root
     }
 
@@ -38,12 +57,16 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
         setObserver()
         setAddButton()
         setErrorHandler()
+
+        setupModeSwitchButtons()
+        setupSearchForm()
     }
 
     private fun setRecyclerView() {
 
         adapter = ItemsAdapter { item ->
-            viewModel.selectItem(item)
+            val message = item.getAllInfo()
+            showItemDialog(item, message)
         }
 
         binding.apply {
@@ -103,7 +126,25 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
     private fun setObserver() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             viewModel.libraryItems.collect { items ->
-                adapter.submitList(items)
+                if (!isGoogleBooksMode) {
+                    withContext(Dispatchers.Main) {
+                        adapter.submitList(items)
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.googleBooks.collect { books ->
+                if (isGoogleBooksMode) {
+                    adapter.submitList(books)
+                }
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.isLoading.collect { isLoading ->
+                binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
             }
         }
     }
@@ -115,7 +156,7 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
                     AlertDialog.Builder(requireContext()).setTitle(viewModel.error.value)
                         .setMessage("Попробуй ещё раз")
                         .setPositiveButton("ОК") { _, _ ->
-                            if (viewModel.error.value == "Ошибка загрузки данных") {
+                            if (viewModel.error.value == LOAD_ERROR) {
                                 viewModel.loadInitialPage()
                             }
                         }
@@ -125,10 +166,109 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
         }
     }
 
+    private fun showItemDialog(item: LibraryItems, message: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Информация о книге")
+            .setMessage(message)
+            .setPositiveButton("Сохранить в библиотеку") { _, _ ->
+                val existingItem = viewModel.libraryItems.value.find {
+                    it.name == item.name && it is Books
+                }
+                if (existingItem != null) {
+                    val message1 = "Эта книга уже есть в библиотеке"
+                    showSnackbar(message1)
+                } else {
+                    viewModel.addItem(item)
+                    val message2 = "Книга добавлена в библиотеку"
+                    showSnackbar(message2)
+                }
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+    }
+
+    private fun showSnackbar(mes: String) {
+        Snackbar.make(binding.root, mes, Snackbar.LENGTH_SHORT).show()
+    }
+
+    private fun setupModeSwitchButtons() {
+        binding.btnLibrary.setOnClickListener{
+            isGoogleBooksMode = false
+            viewModel.loadInitialPage()
+            binding.googleBooksSearchLayout.visibility = View.GONE
+        }
+
+        binding.btnGoogleBooks.setOnClickListener{
+            isGoogleBooksMode = true
+            adapter.submitList(emptyList())
+            binding.googleBooksSearchLayout.visibility = View.VISIBLE
+        }
+    }
+
+    private fun setupSearchForm() {
+        binding.btnSearch.isEnabled = false
+
+        binding.etTitle.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                updateSearchButtonState()
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        binding.etAuthor.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                updateSearchButtonState()
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        binding.btnSearch.setOnClickListener {
+            val author = binding.etAuthor.text.toString()
+            val title = binding.etTitle.text.toString()
+            performSearch(author, title)
+        }
+    }
+
+    private fun updateSearchButtonState() {
+        val authorText = binding.etAuthor.text.toString()
+        val titleText = binding.etTitle.text.toString()
+
+        binding.btnSearch.isEnabled = authorText.length >= 3 || titleText.length >= 3
+    }
+
+    private fun performSearch(author: String, title: String) {
+        val query = buildSearchQuery(title, author)
+        val message = "Введите минимум 3 символа"
+
+        if (query.length < 3) {
+            showSnackbar(message)
+            return
+        }
+        Toast.makeText(requireContext(), "Поиск: $query", Toast.LENGTH_SHORT).show()
+        viewModel.searchGoogleBooks(query, title)
+    }
+
+    private fun buildSearchQuery(title: String, author: String): String {
+        return when {
+            title.isNotEmpty() && author.isNotEmpty() -> "intitle:$title+inauthor:$author"
+            title.isNotEmpty() -> "intitle:$title"
+            author.isNotEmpty() -> "inauthor:$author"
+            else -> ""
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         val position = (binding.rcView.layoutManager as GridLayoutManager)
             .findFirstVisibleItemPosition()
         viewModel.saveScrollPosition(position)
+    }
+
+    companion object {
+        const val LOAD_ERROR = "Ошибка загрузки данных"
     }
 }

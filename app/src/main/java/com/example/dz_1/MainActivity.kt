@@ -12,7 +12,6 @@ import androidx.lifecycle.lifecycleScope
 import classes.library.LibraryItems
 import com.example.dz_1.databinding.ActivityMainBinding
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -20,9 +19,12 @@ class MainActivity : AppCompatActivity() {
     private val binding by lazy {ActivityMainBinding.inflate(layoutInflater)}
     private val viewModel: MainViewModel by viewModels {
         MainViewModelFactory(
-            LibraryRepository(FirstDB.getDb(this).getDao(),
-            SettingsManager(this)
-        ))
+            LibraryRepository(
+                Library_DB.getDb(this).getDao(),
+                SettingsManager(this),
+                RetrofitInstance.googleBooksApi
+            )
+        )
     }
 
     private var isPortrait = true
