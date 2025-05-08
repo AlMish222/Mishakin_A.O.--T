@@ -7,7 +7,7 @@ import classes.library.LibraryItems
 import classes.library.Newspapers
 import interfaces.GoogleBooksApi
 import interfaces.LibraryDao
-import retrofit2.http.Query
+
 
 class LibraryRepository(
     private val dao: LibraryDao,

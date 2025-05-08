@@ -75,5 +75,7 @@ dependencies {
     implementation(libs.okhttp)
     //implementation("com.google.code.gson:gson:2.10.1")
     implementation(libs.gson)
+    //implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation(libs.logging.interceptor)
 
 }

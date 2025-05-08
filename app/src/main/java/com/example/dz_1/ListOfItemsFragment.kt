@@ -241,15 +241,12 @@ class ListOfItemsFragment : Fragment(R.layout.fragment_list) {
     }
 
     private fun performSearch(author: String, title: String) {
-        val query = buildSearchQuery(title, author)
-        val message = "Введите минимум 3 символа"
-
-        if (query.length < 3) {
-            showSnackbar(message)
+        if (author.length < 3 && title.length < 3) {
+            showSnackbar("Введите минимум 3 символа")
             return
         }
-        Toast.makeText(requireContext(), "Поиск: $query", Toast.LENGTH_SHORT).show()
-        viewModel.searchGoogleBooks(query, title)
+
+        viewModel.searchGoogleBooks(author, title)
     }
 
     private fun buildSearchQuery(title: String, author: String): String {

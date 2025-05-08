@@ -11,6 +11,6 @@ interface GoogleBooksApi {
     suspend fun searchBooks(
         @Query("q") query: String,
         @Query("key") apiKey: String,
-        @Query("maxResult") maxResults: Int = 20
+        @Query("maxResults") maxResults: Int = 20
     ): Response<GoogleBooksResponse>
 }
