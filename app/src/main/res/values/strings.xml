@@ -17,4 +17,11 @@
     <string name="discs">Disc</string>
     <string name="is_available">Есть в наличии: </string>
 
+    <string name="library">Библиотека</string>
+    <string name="google_books">Google Books</string>
+    <string name="author_google">Автор</string>
+    <string name="title">Заголовок</string>
+    <string name="search">Поиск</string>
+    <string name="not_data">Нет данных</string>
+
 </resources>
