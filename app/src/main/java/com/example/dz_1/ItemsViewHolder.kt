@@ -1,6 +1,7 @@
 package com.example.dz_1
 
 import androidx.recyclerview.widget.RecyclerView
+import classes.library.Books
 import classes.library.LibraryItems
 import com.example.dz_1.databinding.LibraryItemsBinding
 
@@ -13,25 +14,12 @@ class ItemsViewHolder(
         tvTtile.text = itemView.context.getString(R.string.titleName, libraryItems.name)
         itemId.text = itemView.context.getString(R.string.prItemId, libraryItems.id)
 
-        //updateItemState(libraryItems)
-
-//        cardView.setOnClickListener {
-//            listener.onItemClick(libraryItems, adapterPosition)
-//        }
+        if (libraryItems is Books) {
+            tvAuthor.text = itemView.context.getString(R.string.book_author, libraryItems.author)
+            tvPages.text = itemView.context.getString(R.string.count_page, libraryItems.pages)
+        } else {
+            tvAuthor.text = ""
+            tvPages.text = ""
+        }
     }
-
-//    private fun updateItemState(libraryItems: LibraryItems) = with(binding) {
-//        val alpha = if (libraryItems.isAvailable) 1f else 0.3f
-//        tvTtile.alpha = alpha
-//        itemId.alpha = alpha
-//        cardView.elevation = if (libraryItems.isAvailable) 10f else 1f
-//    }
-
-//    private fun changeElevation(libraryItems: LibraryItems): Float{
-//        return if (libraryItems.isAvailable) 10f else 1f
-//    }
-//
-//    private fun changeAlpha(libraryItems: LibraryItems): Float {
-//        return if (libraryItems.isAvailable) 1f else 0.3f
-//    }
 }

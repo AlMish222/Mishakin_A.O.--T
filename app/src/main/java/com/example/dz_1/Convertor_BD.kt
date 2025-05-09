@@ -5,8 +5,8 @@ import androidx.room.TypeConverter
 class Convertor_BD {
 
     @TypeConverter
-    fun fromItemType(type: EnumClass_BD): String = type.name
+    fun fromItemType(type: TypeOfElement): String = type.name
 
     @TypeConverter
-    fun toItemType(value: String): EnumClass_BD = EnumClass_BD.valueOf(value)
+    fun toItemType(value: String): TypeOfElement = TypeOfElement.valueOf(value)
 }

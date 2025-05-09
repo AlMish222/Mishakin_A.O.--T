@@ -11,44 +11,48 @@
     tools:context="com.example.dz_1.MainActivity">
 
 
-    <FrameLayout
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:name="com.example.dz_1.ListOfItemsFragment"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout="@layout/fragment_list" />
 
-        <com.facebook.shimmer.ShimmerFrameLayout
-            android:id="@+id/shimmerContainer"
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:shimmer_duration="800">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:shimmer_duration="800">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <include layout="@layout/library_item_shimmer"/>
-                <include layout="@layout/library_item_shimmer"/>
-                <include layout="@layout/library_item_shimmer"/>
-                <include layout="@layout/library_item_shimmer"/>
-            </LinearLayout>
-        </com.facebook.shimmer.ShimmerFrameLayout>
-
-        <TextView
-            android:id="@+id/emptyText"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Нет даннх"
-            android:textSize="20sp"
-            android:textColor="@color/teal_700"
-            android:visibility="gone"
-            android:layout_gravity="center"
-            android:textStyle="bold"/>
+            android:orientation="vertical">
+            <include layout="@layout/library_item_shimmer"/>
+            <include layout="@layout/library_item_shimmer"/>
+            <include layout="@layout/library_item_shimmer"/>
+            <include layout="@layout/library_item_shimmer"/>
+        </LinearLayout>
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
-    </FrameLayout>
+    <TextView
+        android:id="@+id/emptyText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/not_data"
+        android:textSize="20sp"
+        android:textColor="@color/teal_700"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
