@@ -77,7 +77,8 @@ dependencies {
     implementation(libs.gson)
     //implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation(libs.logging.interceptor)
-
-
-
+    //implementation("androidx.viewpager2:viewpager2:1.1.0")
+    implementation(libs.androidx.viewpager2)
+    //implementation ("com.google.android.material:material:<version>")
+    implementation (libs.material.vversion)
 }
